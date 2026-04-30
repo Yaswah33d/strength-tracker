@@ -2,1844 +2,1554 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no"/>
 <title>STRENGTH TRACKER</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,300;0,400;0,600;0,700;0,900;1,700&family=Barlow:wght@300;400;500&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,300;0,400;0,600;0,700;0,900;1,400&family=Barlow:wght@300;400;500&family=Share+Tech+Mono&display=swap" rel="stylesheet">
 <style>
-:root {
-  --bg: #050506;
-  --bg2: #08080a;
-  --surface: #0d0d10;
-  --surface2: #121218;
-  --surface3: #17171f;
-  --border: #1e1e28;
-  --border2: #28283a;
-  --accent: #d4f700;
-  --accent-dim: rgba(212,247,0,0.12);
-  --accent2: #00c8ff;
-  --accent2-dim: rgba(0,200,255,0.1);
-  --warn: #ff4d1a;
-  --warn-dim: rgba(255,77,26,0.1);
-  --green: #00ffaa;
-  --green-dim: rgba(0,255,170,0.08);
-  --purple: #9d6fff;
-  --text: #e0e0e8;
-  --text2: #a0a0b8;
-  --muted: #52526a;
-  --mono: 'Share Tech Mono', monospace;
-}
-
-* { box-sizing: border-box; margin: 0; padding: 0; }
-
-body {
-  background: var(--bg);
-  color: var(--text);
-  font-family: 'Barlow', sans-serif;
-  font-weight: 300;
-  min-height: 100vh;
-  overflow-x: hidden;
-}
-
-/* Scanline grain overlay */
-body::after {
-  content: '';
-  position: fixed;
-  inset: 0;
-  background:
-    repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.03) 2px, rgba(0,0,0,0.03) 4px),
-    url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.05'/%3E%3C/svg%3E");
-  pointer-events: none;
-  z-index: 9999;
-  opacity: 0.6;
-}
-
-/* Glow edge effect */
-body::before {
-  content: '';
-  position: fixed;
-  top: 0; left: 0; right: 0;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, var(--accent), transparent);
-  z-index: 100;
-  opacity: 0.6;
-}
-
-.container { max-width: 960px; margin: 0 auto; padding: 0 16px 80px; }
-
-/* ═══════════ HEADER ═══════════ */
-.site-header {
-  border-bottom: 1px solid var(--border);
-  padding: 28px 0 24px;
-  margin-bottom: 28px;
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: 20px;
-  flex-wrap: wrap;
-}
-
-.header-left {}
-
-.site-title {
-  font-family: 'Barlow Condensed', sans-serif;
-  font-size: clamp(52px, 9vw, 96px);
-  font-weight: 900;
-  line-height: 0.85;
-  letter-spacing: -3px;
-  text-transform: uppercase;
-  color: var(--text);
-}
-
-.site-title .accent { color: var(--accent); }
-.site-title .dim { color: var(--muted); font-weight: 300; letter-spacing: -1px; }
-
-.site-sub {
-  font-family: var(--mono);
-  font-size: 11px;
-  color: var(--muted);
-  letter-spacing: 2px;
-  text-transform: uppercase;
-  margin-top: 10px;
-}
-
-.site-sub span { color: var(--accent2); }
-
-.header-right {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 10px;
-}
-
-/* DELOAD TOGGLE */
-.deload-wrap { display: flex; align-items: center; gap: 10px; }
-.deload-label {
-  font-family: 'Barlow Condensed', sans-serif;
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 2px;
-  text-transform: uppercase;
-  color: var(--muted);
-}
-.deload-wrap.active .deload-label { color: var(--warn); }
-
-.toggle-switch {
-  position: relative;
-  width: 44px;
-  height: 24px;
-  cursor: pointer;
-}
-.toggle-switch input { opacity: 0; width: 0; height: 0; }
-.toggle-slider {
-  position: absolute;
-  inset: 0;
-  background: var(--surface3);
-  border: 1px solid var(--border2);
-  border-radius: 12px;
-  transition: all 0.2s;
-}
-.toggle-slider::before {
-  content: '';
-  position: absolute;
-  width: 16px; height: 16px;
-  left: 3px; top: 3px;
-  background: var(--muted);
-  border-radius: 50%;
-  transition: all 0.2s;
-}
-.toggle-switch input:checked + .toggle-slider { background: var(--warn-dim); border-color: var(--warn); }
-.toggle-switch input:checked + .toggle-slider::before { transform: translateX(20px); background: var(--warn); }
-
-/* SHEETS LINK */
-.sheets-btn {
-  font-family: var(--mono);
-  font-size: 10px;
-  letter-spacing: 1.5px;
-  text-transform: uppercase;
-  color: var(--accent2);
-  background: var(--accent2-dim);
-  border: 1px solid rgba(0,200,255,0.2);
-  padding: 6px 14px;
-  border-radius: 4px;
-  cursor: pointer;
-  text-decoration: none;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  transition: all 0.15s;
-}
-.sheets-btn:hover { background: rgba(0,200,255,0.18); border-color: var(--accent2); }
-
-/* ═══════════ DAY SELECTOR ═══════════ */
-.day-selector-wrap {
-  margin-bottom: 24px;
-}
-
-.day-selector-label {
-  font-family: var(--mono);
-  font-size: 10px;
-  color: var(--muted);
-  letter-spacing: 2px;
-  text-transform: uppercase;
-  margin-bottom: 10px;
-}
-
-.day-selector {
-  display: grid;
-  grid-template-columns: repeat(8, 1fr);
-  gap: 6px;
-}
-
-.day-btn {
-  background: var(--surface2);
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  padding: 10px 4px 8px;
-  text-align: center;
-  cursor: pointer;
-  transition: all 0.15s;
-}
-.day-btn:hover { border-color: var(--border2); background: var(--surface3); }
-.day-btn.active { background: var(--accent-dim); border-color: rgba(212,247,0,0.5); }
-.day-btn.rest-btn { opacity: 0.5; }
-.day-btn.rest-btn.active { opacity: 1; background: var(--surface3); border-color: var(--border2); }
-
-.day-btn-num {
-  font-family: 'Barlow Condensed', sans-serif;
-  font-size: 22px;
-  font-weight: 900;
-  color: var(--muted);
-  line-height: 1;
-  display: block;
-}
-.day-btn.active .day-btn-num { color: var(--accent); }
-.day-btn.rest-btn .day-btn-num { color: var(--muted); }
-
-.day-btn-name {
-  font-family: 'Barlow Condensed', sans-serif;
-  font-size: 9px;
-  font-weight: 700;
-  letter-spacing: 1px;
-  text-transform: uppercase;
-  color: var(--muted);
-  margin-top: 3px;
-  display: block;
-}
-.day-btn.active .day-btn-name { color: var(--text2); }
-
-/* ═══════════ WORKOUT HEADER ═══════════ */
-.workout-header {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-top: 2px solid var(--accent);
-  border-radius: 0 0 8px 8px;
-  padding: 20px 22px;
-  margin-bottom: 16px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  flex-wrap: wrap;
-}
-
-.workout-day-label {
-  font-family: var(--mono);
-  font-size: 10px;
-  color: var(--accent);
-  letter-spacing: 2px;
-  text-transform: uppercase;
-  margin-bottom: 4px;
-}
-
-.workout-title {
-  font-family: 'Barlow Condensed', sans-serif;
-  font-size: 32px;
-  font-weight: 900;
-  text-transform: uppercase;
-  letter-spacing: 0px;
-  line-height: 1;
-}
-
-.workout-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
-.wtag {
-  font-family: var(--mono);
-  font-size: 9px;
-  letter-spacing: 1px;
-  text-transform: uppercase;
-  padding: 3px 8px;
-  border-radius: 3px;
-  background: var(--surface3);
-  border: 1px solid var(--border2);
-  color: var(--muted);
-}
-.wtag.accent { background: var(--accent-dim); border-color: rgba(212,247,0,0.25); color: var(--accent); }
-.wtag.blue { background: var(--accent2-dim); border-color: rgba(0,200,255,0.2); color: var(--accent2); }
-.wtag.green { background: var(--green-dim); border-color: rgba(0,255,170,0.2); color: var(--green); }
-.wtag.warn { background: var(--warn-dim); border-color: rgba(255,77,26,0.2); color: var(--warn); }
-
-.workout-meta-right { text-align: right; }
-.time-budget-label { font-family: var(--mono); font-size: 9px; color: var(--muted); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 6px; }
-.time-select {
-  background: var(--surface3);
-  border: 1px solid var(--border2);
-  color: var(--text);
-  font-family: 'Barlow Condensed', sans-serif;
-  font-size: 18px;
-  font-weight: 700;
-  padding: 6px 10px;
-  border-radius: 4px;
-  cursor: pointer;
-  appearance: none;
-  -webkit-appearance: none;
-  min-width: 90px;
-  text-align: center;
-}
-.time-select:focus { outline: none; border-color: var(--accent); }
-
-/* ═══════════ WARMUP BLOCK ═══════════ */
-.warmup-block {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-left: 3px solid var(--accent2);
-  border-radius: 0 6px 6px 0;
-  padding: 14px 18px;
-  margin-bottom: 16px;
-}
-
-.warmup-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  cursor: pointer;
-}
-
-.warmup-title {
-  font-family: 'Barlow Condensed', sans-serif;
-  font-size: 13px;
-  font-weight: 700;
-  letter-spacing: 2px;
-  text-transform: uppercase;
-  color: var(--accent2);
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.warmup-chevron { color: var(--muted); font-size: 12px; transition: transform 0.2s; }
-.warmup-block.open .warmup-chevron { transform: rotate(180deg); }
-
-.warmup-body { display: none; margin-top: 14px; }
-.warmup-block.open .warmup-body { display: block; }
-
-.warmup-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-  gap: 8px;
-}
-
-.wmob-card {
-  background: var(--surface3);
-  border: 1px solid var(--border);
-  border-radius: 5px;
-  padding: 10px 12px;
-}
-.wmob-num { font-family: var(--mono); font-size: 10px; color: var(--accent2); letter-spacing: 1px; }
-.wmob-name { font-size: 12.5px; font-weight: 500; margin: 2px 0; }
-.wmob-detail { font-size: 11px; color: var(--muted); line-height: 1.5; }
-.wmob-time { font-family: 'Barlow Condensed', sans-serif; font-size: 14px; font-weight: 700; color: var(--accent); margin-top: 3px; }
-
-/* ═══════════ EXERCISE BLOCK ═══════════ */
-.section-label {
-  font-family: var(--mono);
-  font-size: 10px;
-  color: var(--muted);
-  letter-spacing: 2.5px;
-  text-transform: uppercase;
-  margin: 20px 0 10px;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-.section-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
-
-.ex-block {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  margin-bottom: 10px;
-  overflow: hidden;
-  transition: border-color 0.15s;
-}
-.ex-block:hover { border-color: var(--border2); }
-.ex-block.spine-warn { border-left: 2px solid var(--warn); }
-
-.ex-main {
-  display: grid;
-  grid-template-columns: 1fr auto;
-  align-items: start;
-  padding: 14px 16px;
-  gap: 12px;
-}
-
-.ex-name-row {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 7px;
-  margin-bottom: 3px;
-}
-
-.ex-name {
-  font-size: 14px;
-  font-weight: 500;
-  color: var(--text);
-}
-
-.spine-badge {
-  font-family: var(--mono);
-  font-size: 8.5px;
-  letter-spacing: 0.5px;
-  background: var(--warn-dim);
-  border: 1px solid rgba(255,77,26,0.3);
-  color: var(--warn);
-  padding: 1px 5px;
-  border-radius: 2px;
-}
-
-.ex-muscle { font-size: 11.5px; color: var(--muted); }
-
-.ex-right { text-align: right; }
-
-.ex-target {
-  font-family: 'Barlow Condensed', sans-serif;
-  font-size: 18px;
-  font-weight: 700;
-  color: var(--accent);
-  line-height: 1;
-}
-
-.ex-target.deload-mode { color: var(--warn); }
-
-.ex-rest-label {
-  font-family: var(--mono);
-  font-size: 9px;
-  color: var(--muted);
-  letter-spacing: 1px;
-  margin-top: 3px;
-}
-
-/* LAST SESSION */
-.ex-last {
-  padding: 6px 16px 10px;
-  border-top: 1px solid var(--border);
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  flex-wrap: wrap;
-}
-
-.last-label {
-  font-family: var(--mono);
-  font-size: 9px;
-  color: var(--muted);
-  letter-spacing: 1px;
-  text-transform: uppercase;
-  white-space: nowrap;
-}
-
-.last-val {
-  font-family: var(--mono);
-  font-size: 11px;
-  color: var(--accent2);
-}
-
-.form-toggle-btn {
-  font-family: var(--mono);
-  font-size: 9px;
-  color: var(--muted);
-  letter-spacing: 1px;
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: 0;
-  margin-left: auto;
-  text-transform: uppercase;
-  transition: color 0.15s;
-}
-.form-toggle-btn:hover { color: var(--accent); }
-.ex-block.form-open .form-toggle-btn { color: var(--accent); }
-
-/* FORM CUES */
-.form-panel {
-  display: none;
-  background: var(--surface2);
-  border-top: 1px solid var(--border);
-  padding: 14px 16px 16px;
-}
-.ex-block.form-open .form-panel { display: block; }
-
-.form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; margin-bottom: 12px; }
-
-.cue-title {
-  font-family: var(--mono);
-  font-size: 9px;
-  letter-spacing: 1.5px;
-  text-transform: uppercase;
-  margin-bottom: 7px;
-  padding-bottom: 5px;
-  border-bottom: 1px solid var(--border);
-  color: var(--muted);
-}
-.cue-title.setup { color: var(--accent2); border-color: rgba(0,200,255,0.15); }
-.cue-title.exec { color: var(--green); border-color: rgba(0,255,170,0.15); }
-.cue-title.breath { color: var(--purple); border-color: rgba(157,111,255,0.15); }
-.cue-title.err { color: var(--warn); border-color: rgba(255,77,26,0.15); }
-
-.cue-list { list-style: none; }
-.cue-list li { font-size: 12px; color: #b0b0c8; line-height: 1.55; padding: 2px 0 2px 14px; position: relative; }
-.cue-list li::before { content: '—'; position: absolute; left: 0; color: var(--border2); font-size: 10px; }
-.cue-list li.key::before { content: '›'; color: var(--accent); font-size: 12px; }
-.cue-list li.key { color: var(--text); }
-.cue-list li.bad::before { content: '✗'; color: var(--warn); }
-.cue-list li.bad { color: #b09080; }
-
-.tempo-row {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  flex-wrap: wrap;
-  padding-top: 10px;
-  border-top: 1px solid var(--border);
-}
-.tempo-label-text { font-family: var(--mono); font-size: 9px; color: var(--muted); letter-spacing: 1px; text-transform: uppercase; margin-right: 2px; }
-.tbox { background: var(--surface3); border: 1px solid var(--border2); border-radius: 3px; padding: 3px 8px; text-align: center; min-width: 40px; }
-.tnum { font-family: 'Barlow Condensed', sans-serif; font-size: 18px; font-weight: 700; color: var(--accent); line-height: 1; }
-.tphase { font-family: var(--mono); font-size: 8px; color: var(--muted); letter-spacing: 0.5px; }
-.tsep { color: var(--border2); font-size: 14px; }
-
-/* LOGGING */
-.log-section {
-  border-top: 1px solid var(--border);
-  padding: 12px 16px 14px;
-  background: var(--bg2);
-}
-
-.log-section-title {
-  font-family: var(--mono);
-  font-size: 9px;
-  color: var(--muted);
-  letter-spacing: 2px;
-  text-transform: uppercase;
-  margin-bottom: 10px;
-}
-
-.set-rows { display: flex; flex-direction: column; gap: 6px; }
-
-.set-row {
-  display: grid;
-  grid-template-columns: 28px 1fr 1fr 60px 1fr auto;
-  align-items: center;
-  gap: 6px;
-}
-
-.set-num {
-  font-family: var(--mono);
-  font-size: 10px;
-  color: var(--muted);
-  text-align: center;
-}
-
-.set-input {
-  background: var(--surface3);
-  border: 1px solid var(--border2);
-  border-radius: 4px;
-  padding: 6px 8px;
-  font-family: var(--mono);
-  font-size: 12px;
-  color: var(--text);
-  width: 100%;
-  transition: border-color 0.15s;
-  -webkit-appearance: none;
-}
-.set-input:focus { outline: none; border-color: var(--accent); background: var(--surface2); }
-.set-input::placeholder { color: var(--muted); }
-
-.rpe-select {
-  background: var(--surface3);
-  border: 1px solid var(--border2);
-  border-radius: 4px;
-  padding: 6px 4px;
-  font-family: var(--mono);
-  font-size: 11px;
-  color: var(--text2);
-  width: 100%;
-  cursor: pointer;
-  -webkit-appearance: none;
-  appearance: none;
-  text-align: center;
-}
-.rpe-select:focus { outline: none; border-color: var(--accent); }
-
-.save-set-btn {
-  font-family: var(--mono);
-  font-size: 9px;
-  letter-spacing: 1px;
-  text-transform: uppercase;
-  background: var(--accent-dim);
-  border: 1px solid rgba(212,247,0,0.3);
-  color: var(--accent);
-  padding: 6px 10px;
-  border-radius: 4px;
-  cursor: pointer;
-  white-space: nowrap;
-  transition: all 0.15s;
-}
-.save-set-btn:hover { background: rgba(212,247,0,0.2); border-color: var(--accent); }
-.save-set-btn.saved { background: var(--green-dim); border-color: rgba(0,255,170,0.3); color: var(--green); }
-
-.log-input-col { grid-column: 3 / 6; }
-.notes-row { margin-top: 6px; }
-.notes-input {
-  width: 100%;
-  background: var(--surface3);
-  border: 1px solid var(--border);
-  border-radius: 4px;
-  padding: 6px 10px;
-  font-family: 'Barlow', sans-serif;
-  font-size: 12px;
-  font-weight: 300;
-  color: var(--text2);
-  resize: none;
-  min-height: 34px;
-}
-.notes-input:focus { outline: none; border-color: var(--border2); }
-.notes-input::placeholder { color: var(--muted); }
-
-/* FINISHER */
-.finisher-card {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-top: 2px solid var(--warn);
-  border-radius: 0 0 8px 8px;
-  padding: 16px 18px;
-  margin-top: 6px;
-}
-.finisher-title {
-  font-family: 'Barlow Condensed', sans-serif;
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 2px;
-  text-transform: uppercase;
-  color: var(--warn);
-  margin-bottom: 10px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-.finisher-card p { font-size: 13px; color: var(--text2); line-height: 1.7; }
-.finisher-card p strong { color: var(--text); font-weight: 500; }
-
-/* COOLDOWN */
-.cooldown-card {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-top: 2px solid var(--green);
-  border-radius: 0 0 8px 8px;
-  padding: 16px 18px;
-  margin-top: 6px;
-}
-.cooldown-title {
-  font-family: 'Barlow Condensed', sans-serif;
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 2px;
-  text-transform: uppercase;
-  color: var(--green);
-  margin-bottom: 8px;
-}
-.cooldown-card p { font-size: 13px; color: var(--text2); line-height: 1.7; }
-
-/* CARDIO DAY */
-.cardio-block {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-top: 2px solid var(--accent2);
-  border-radius: 8px;
-  overflow: hidden;
-}
-.cardio-header {
-  padding: 20px 20px 16px;
-  border-bottom: 1px solid var(--border);
-}
-.cardio-title {
-  font-family: 'Barlow Condensed', sans-serif;
-  font-size: 28px;
-  font-weight: 900;
-  text-transform: uppercase;
-  letter-spacing: 0;
-  color: var(--text);
-}
-.cardio-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 0;
-}
-.cardio-machine {
-  padding: 18px 20px;
-  border-right: 1px solid var(--border);
-  border-bottom: 1px solid var(--border);
-}
-.cardio-machine:last-child { border-right: none; }
-.cm-icon { font-size: 24px; margin-bottom: 8px; }
-.cm-name {
-  font-family: 'Barlow Condensed', sans-serif;
-  font-size: 16px;
-  font-weight: 700;
-  text-transform: uppercase;
-  color: var(--accent2);
-  margin-bottom: 4px;
-}
-.cm-protocol { font-size: 12.5px; color: var(--text2); line-height: 1.6; }
-.cm-protocol strong { color: var(--text); font-weight: 500; }
-
-/* REST DAY */
-.rest-day-block {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 32px;
-  text-align: center;
-}
-.rest-day-num {
-  font-family: 'Barlow Condensed', sans-serif;
-  font-size: 80px;
-  font-weight: 900;
-  color: var(--muted);
-  line-height: 1;
-  letter-spacing: -3px;
-}
-.rest-day-label {
-  font-family: 'Barlow Condensed', sans-serif;
-  font-size: 20px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 2px;
-  color: var(--muted);
-  margin: 8px 0 16px;
-}
-.rest-day-block p { font-size: 13px; color: var(--muted); line-height: 1.7; max-width: 400px; margin: 0 auto; }
-
-/* SHEET CONFIG */
-.sheet-config {
-  background: var(--surface2);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 16px 18px;
-  margin-bottom: 20px;
-  display: none;
-}
-.sheet-config.visible { display: block; }
-.sheet-config-title { font-family: var(--mono); font-size: 10px; color: var(--accent2); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 10px; }
-.sheet-row { display: flex; gap: 8px; align-items: center; }
-.sheet-input {
-  flex: 1;
-  background: var(--surface3);
-  border: 1px solid var(--border2);
-  border-radius: 4px;
-  padding: 8px 12px;
-  font-family: var(--mono);
-  font-size: 11px;
-  color: var(--text);
-}
-.sheet-input:focus { outline: none; border-color: var(--accent2); }
-.sheet-save-btn {
-  font-family: var(--mono);
-  font-size: 9px;
-  letter-spacing: 1px;
-  text-transform: uppercase;
-  background: var(--accent2-dim);
-  border: 1px solid rgba(0,200,255,0.3);
-  color: var(--accent2);
-  padding: 8px 14px;
-  border-radius: 4px;
-  cursor: pointer;
-  white-space: nowrap;
-}
-
-/* STATUS BAR */
-.status-bar {
-  position: fixed;
-  bottom: 0; left: 0; right: 0;
-  background: var(--bg2);
-  border-top: 1px solid var(--border);
-  padding: 8px 20px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  z-index: 50;
-  flex-wrap: wrap;
-}
-.status-item {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-family: var(--mono);
-  font-size: 10px;
-  color: var(--muted);
-  letter-spacing: 1px;
-}
-.status-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--muted); }
-.status-dot.green { background: var(--green); box-shadow: 0 0 6px var(--green); }
-.status-dot.warn { background: var(--warn); }
-.status-val { color: var(--text2); }
-
-/* TOAST */
-.toast {
-  position: fixed;
-  bottom: 50px; right: 20px;
-  background: var(--surface3);
-  border: 1px solid var(--border2);
-  border-left: 3px solid var(--green);
-  padding: 10px 16px;
-  border-radius: 4px;
-  font-family: var(--mono);
-  font-size: 11px;
-  color: var(--green);
-  letter-spacing: 1px;
-  z-index: 200;
-  transform: translateX(200%);
-  transition: transform 0.2s;
-  pointer-events: none;
-}
-.toast.show { transform: translateX(0); }
-
-@media (max-width: 600px) {
-  .day-selector { grid-template-columns: repeat(4, 1fr); }
-  .set-row { grid-template-columns: 24px 1fr 1fr 50px auto; }
-  .set-row .rpe-select { display: none; }
-  .form-grid { grid-template-columns: 1fr; }
-  .site-title { font-size: 48px; }
+:root{
+  --bg:#040405;--bg2:#070709;--surface:#0c0c10;--surface2:#101015;--surface3:#15151e;
+  --border:#1a1a26;--border2:#252538;
+  --accent:#c8f000;--adim:rgba(200,240,0,0.09);--aglow:rgba(200,240,0,0.2);
+  --accent2:#00b8f0;--a2dim:rgba(0,184,240,0.09);
+  --warn:#ff3d00;--wdim:rgba(255,61,0,0.09);
+  --green:#00e896;--gdim:rgba(0,232,150,0.07);
+  --purple:#8b5cf6;--gold:#f0a500;--goldim:rgba(240,165,0,0.09);
+  --text:#dddde8;--text2:#9090a8;--muted:#444458;
+  --mono:'Share Tech Mono',monospace;--cond:'Barlow Condensed',sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+body{background:var(--bg);color:var(--text);font-family:'Barlow',sans-serif;font-weight:300;min-height:100vh;overflow-x:hidden;}
+body::after{content:'';position:fixed;inset:0;background:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");pointer-events:none;z-index:9999;}
+.wrap{max-width:680px;margin:0 auto;padding:0 14px 110px;}
+
+/* MANTRA */
+.mantra{background:linear-gradient(135deg,#08080a,#0b0b07);border-bottom:1px solid rgba(200,240,0,0.1);padding:16px 20px 14px;text-align:center;margin:0 -14px;position:relative;overflow:hidden;}
+.mantra::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 50% 0%,rgba(200,240,0,0.05) 0%,transparent 70%);}
+.mantra-h{font-family:var(--cond);font-size:clamp(24px,7vw,44px);font-weight:900;letter-spacing:5px;text-transform:uppercase;color:var(--accent);line-height:1;position:relative;text-shadow:0 0 40px rgba(200,240,0,0.2);}
+.mantra-q{font-style:italic;font-weight:300;font-size:clamp(10px,2.5vw,12px);color:var(--text2);margin-top:6px;line-height:1.5;position:relative;max-width:420px;margin-left:auto;margin-right:auto;}
+
+/* HEADER */
+.hdr{padding:16px 0 14px;border-bottom:1px solid var(--border);margin-bottom:16px;display:flex;align-items:flex-end;justify-content:space-between;gap:10px;flex-wrap:wrap;}
+.site-ttl{font-family:var(--cond);font-size:clamp(32px,8vw,56px);font-weight:900;line-height:0.88;letter-spacing:-2px;text-transform:uppercase;}
+.site-ttl .ac{color:var(--accent);}
+.site-ttl .dm{color:var(--muted);font-weight:300;}
+.site-sub{font-family:var(--mono);font-size:9px;color:var(--muted);letter-spacing:2px;margin-top:7px;}
+.site-sub span{color:var(--accent2);}
+.hdr-r{display:flex;flex-direction:column;align-items:flex-end;gap:8px;}
+.dl-row{display:flex;align-items:center;gap:8px;}
+.dl-lbl{font-family:var(--mono);font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);}
+.dl-row.on .dl-lbl{color:var(--warn);}
+.tsw{position:relative;width:40px;height:22px;cursor:pointer;}
+.tsw input{opacity:0;width:0;height:0;}
+.ttr{position:absolute;inset:0;background:var(--surface3);border:1px solid var(--border2);border-radius:11px;transition:all 0.2s;}
+.ttr::before{content:'';position:absolute;width:14px;height:14px;left:3px;top:3px;background:var(--muted);border-radius:50%;transition:all 0.2s;}
+.tsw input:checked+.ttr{background:var(--wdim);border-color:var(--warn);}
+.tsw input:checked+.ttr::before{transform:translateX(18px);background:var(--warn);}
+
+/* REST TIMER */
+.rest-timer{position:fixed;bottom:46px;left:50%;transform:translateX(-50%);z-index:100;background:var(--surface);border:1px solid var(--border2);border-top:2px solid var(--accent);border-radius:10px;padding:12px 20px;min-width:210px;text-align:center;box-shadow:0 8px 32px rgba(0,0,0,0.7);display:none;}
+.rest-timer.vis{display:block;}
+.rt-lbl{font-family:var(--mono);font-size:8px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:3px;}
+.rt-ex{font-family:var(--cond);font-size:12px;font-weight:700;text-transform:uppercase;color:var(--text2);margin-bottom:7px;letter-spacing:0.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:200px;}
+.rt-time{font-family:var(--cond);font-size:50px;font-weight:900;color:var(--accent);line-height:1;letter-spacing:-2px;transition:color 0.3s;}
+.rt-time.urg{color:var(--warn);animation:pulse 0.5s infinite alternate;}
+@keyframes pulse{from{opacity:1;}to{opacity:0.5;}}
+.rt-track{height:3px;background:var(--border2);border-radius:2px;margin:7px 0;}
+.rt-fill{height:100%;background:var(--accent);border-radius:2px;transition:width 1s linear;}
+.rt-fill.urg{background:var(--warn);}
+.rt-btns{display:flex;gap:7px;justify-content:center;margin-top:7px;}
+.rt-btn{font-family:var(--mono);font-size:8px;letter-spacing:1px;text-transform:uppercase;padding:5px 11px;border-radius:3px;cursor:pointer;border:1px solid var(--border2);background:var(--surface3);color:var(--text2);transition:all 0.15s;}
+.rt-btn.skip{background:var(--adim);border-color:rgba(200,240,0,0.25);color:var(--accent);}
+
+/* NAV */
+.nav{display:flex;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:4px;margin-bottom:16px;}
+.ntab{font-family:var(--cond);font-size:13px;font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:9px 0;border:none;border-radius:5px;cursor:pointer;background:transparent;color:var(--muted);transition:all 0.15s;flex:1;text-align:center;}
+.ntab.active{background:var(--accent);color:#040405;}
+
+/* DAY GRID */
+.day-wrap{margin-bottom:14px;}
+.day-lbl{font-family:var(--mono);font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:7px;}
+.day-grid{display:grid;grid-template-columns:repeat(9,1fr);gap:4px;}
+.db{background:var(--surface2);border:1px solid var(--border);border-radius:5px;padding:8px 2px 7px;text-align:center;cursor:pointer;transition:all 0.15s;}
+.db:hover{border-color:var(--border2);}
+.db.active{background:var(--adim);border-color:rgba(200,240,0,0.4);}
+.db.rest{opacity:0.45;}
+.db.rest.active{opacity:1;background:var(--surface3);border-color:var(--border2);}
+.db-n{font-family:var(--cond);font-size:17px;font-weight:900;color:var(--muted);line-height:1;display:block;}
+.db.active .db-n{color:var(--accent);}
+.db-l{font-family:var(--cond);font-size:7px;font-weight:700;letter-spacing:0.5px;text-transform:uppercase;color:var(--muted);margin-top:2px;display:block;}
+.db.active .db-l{color:var(--text2);}
+
+/* WORKOUT CARD */
+.wk-card{background:var(--surface);border:1px solid var(--border);border-top:2px solid var(--accent);border-radius:0 0 8px 8px;padding:14px;margin-bottom:10px;}
+.wk-day-l{font-family:var(--mono);font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--accent);margin-bottom:3px;}
+.wk-ttl{font-family:var(--cond);font-size:22px;font-weight:900;text-transform:uppercase;letter-spacing:-0.5px;margin-bottom:4px;}
+.wk-sub{font-size:11.5px;color:var(--text2);margin-bottom:7px;}
+.wk-tags{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:10px;}
+.wtag{font-family:var(--mono);font-size:8px;letter-spacing:1px;text-transform:uppercase;padding:2px 7px;border-radius:3px;background:var(--surface3);border:1px solid var(--border2);color:var(--muted);}
+.wtag.ac{background:var(--adim);border-color:rgba(200,240,0,0.2);color:var(--accent);}
+.wtag.bl{background:var(--a2dim);border-color:rgba(0,184,240,0.2);color:var(--accent2);}
+.wtag.gr{background:var(--gdim);border-color:rgba(0,232,150,0.2);color:var(--green);}
+.wtag.wn{background:var(--wdim);border-color:rgba(255,61,0,0.2);color:var(--warn);}
+.time-row{display:flex;align-items:center;gap:8px;padding-top:10px;border-top:1px solid var(--border);}
+.time-lbl{font-family:var(--mono);font-size:8px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);}
+.time-opts{display:flex;gap:4px;}
+.topt{font-family:var(--mono);font-size:9px;padding:4px 9px;background:var(--surface3);border:1px solid var(--border2);border-radius:3px;cursor:pointer;color:var(--muted);transition:all 0.15s;}
+.topt.active{background:var(--adim);border-color:rgba(200,240,0,0.3);color:var(--accent);}
+
+/* INJURY NOTICE */
+.inj{background:var(--wdim);border:1px solid rgba(255,61,0,0.2);border-radius:5px;padding:8px 11px;margin-bottom:9px;font-size:11px;color:#c08878;line-height:1.55;}
+.inj strong{color:var(--warn);font-weight:500;}
+
+/* INTEL */
+.intel{background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:0 6px 6px 0;padding:11px 13px;margin-bottom:9px;}
+.intel-t{font-family:var(--mono);font-size:8px;letter-spacing:2px;text-transform:uppercase;color:var(--accent);margin-bottom:4px;}
+.intel-m{font-size:12px;color:var(--text2);line-height:1.6;}
+.intel-m strong{color:var(--text);font-weight:500;}
+.intel.warn{border-left-color:var(--warn);}
+.intel.warn .intel-t{color:var(--warn);}
+.intel.blue{border-left-color:var(--accent2);}
+.intel.blue .intel-t{color:var(--accent2);}
+
+/* WARMUP */
+.wu{background:var(--surface2);border:1px solid var(--border);border-left:3px solid var(--accent2);border-radius:0 6px 6px 0;margin-bottom:10px;overflow:hidden;}
+.wu-hdr{display:flex;align-items:center;justify-content:space-between;padding:9px 13px;cursor:pointer;}
+.wu-ttl{font-family:var(--mono);font-size:8px;letter-spacing:2px;text-transform:uppercase;color:var(--accent2);}
+.wu-ch{color:var(--muted);font-size:10px;transition:transform 0.2s;}
+.wu.open .wu-ch{transform:rotate(180deg);}
+.wu-body{display:none;padding:0 11px 11px;}
+.wu.open .wu-body{display:block;}
+.wu-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;}
+.wm{background:var(--surface3);border:1px solid var(--border);border-radius:4px;padding:8px 10px;}
+.wm-n{font-family:var(--mono);font-size:8px;color:var(--accent2);}
+.wm-name{font-size:11.5px;font-weight:500;margin:2px 0;}
+.wm-t{font-family:var(--cond);font-size:13px;font-weight:700;color:var(--accent);}
+.wm-d{font-size:10px;color:var(--muted);line-height:1.4;margin-top:1px;}
+
+/* SECTION LABELS */
+.mg-lbl{font-family:var(--mono);font-size:8px;letter-spacing:2.5px;text-transform:uppercase;color:var(--muted);margin:13px 0 6px;display:flex;align-items:center;gap:8px;}
+.mg-lbl::after{content:'';flex:1;height:1px;background:var(--border);}
+.mg-lbl.chest{color:#e87070;}
+.mg-lbl.shoulder{color:var(--accent2);}
+.mg-lbl.tricep{color:var(--purple);}
+.mg-lbl.back{color:var(--accent);}
+.mg-lbl.bicep{color:var(--green);}
+.mg-lbl.traps{color:var(--gold);}
+.mg-lbl.glute{color:#e870a0;}
+.mg-lbl.quad{color:#70c0e8;}
+.mg-lbl.hamstring{color:var(--green);}
+.mg-lbl.calf{color:var(--text2);}
+.mg-lbl.abs{color:var(--warn);}
+.mg-lbl.finisher{color:var(--warn);}
+.mg-lbl.conditioning{color:var(--accent2);}
+
+/* EXERCISE CARD */
+.ex{background:var(--surface);border:1px solid var(--border);border-radius:7px;margin-bottom:6px;overflow:hidden;transition:border-color 0.15s;}
+.ex:hover{border-color:var(--border2);}
+.ex.l2s1{border-left:2px solid var(--warn);}
+.ex.shldr{border-left:2px solid var(--accent2);}
+.ex-top{display:grid;grid-template-columns:1fr auto auto;gap:8px;padding:10px 12px 9px;cursor:pointer;align-items:center;}
+.ex-chev{color:var(--muted);font-size:9px;transition:transform 0.25s;flex-shrink:0;}
+.ex.ex-open .ex-chev{transform:rotate(180deg);}
+.ex-body{display:none;}
+.ex.ex-open .ex-body{display:block;}
+.ex-name-row{display:flex;align-items:center;flex-wrap:wrap;gap:5px;margin-bottom:2px;}
+.ex-name{font-size:13px;font-weight:500;color:var(--text);}
+.badge{font-family:var(--mono);font-size:7.5px;letter-spacing:0.5px;padding:1px 5px;border-radius:2px;}
+.badge.s{background:var(--wdim);border:1px solid rgba(255,61,0,0.3);color:var(--warn);}
+.badge.sh{background:var(--a2dim);border:1px solid rgba(0,184,240,0.3);color:var(--accent2);}
+.badge.cmp{background:var(--goldim);border:1px solid rgba(240,165,0,0.3);color:var(--gold);}
+.badge.fin{background:var(--wdim);border:1px solid rgba(255,61,0,0.2);color:var(--warn);}
+.badge.abs{background:rgba(139,92,246,0.1);border:1px solid rgba(139,92,246,0.3);color:var(--purple);}
+.ex-muscle{font-size:10.5px;color:var(--muted);}
+.ex-right{text-align:right;}
+.ex-target{font-family:var(--cond);font-size:16px;font-weight:700;color:var(--accent);line-height:1;}
+.ex-target.cmp{color:var(--gold);}
+.ex-rest-lbl{font-family:var(--mono);font-size:7.5px;color:var(--muted);margin-top:2px;letter-spacing:0.5px;}
+
+/* EXERCISE BODY */
+.ex-why{font-size:10.5px;color:var(--muted);line-height:1.55;padding:5px 12px 8px;font-style:italic;border-top:1px solid var(--border);}
+.ex-prog{padding:4px 12px 5px;display:flex;align-items:center;gap:6px;flex-wrap:wrap;}
+.pi{font-family:var(--mono);font-size:8px;letter-spacing:1px;padding:2px 7px;border-radius:2px;}
+.pi.up{background:var(--gdim);color:var(--green);border:1px solid rgba(0,232,150,0.2);}
+.pi.hold{background:var(--adim);color:var(--accent);border:1px solid rgba(200,240,0,0.2);}
+.pi.down{background:var(--wdim);color:var(--warn);border:1px solid rgba(255,61,0,0.2);}
+.pi.new{background:var(--a2dim);color:var(--accent2);border:1px solid rgba(0,184,240,0.2);}
+
+/* FORM */
+.ex-footer{border-top:1px solid var(--border);padding:5px 12px;display:flex;align-items:center;justify-content:space-between;}
+.form-btn{font-family:var(--mono);font-size:8px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);background:none;border:none;cursor:pointer;padding:0;}
+.ex.form-open .form-btn{color:var(--accent);}
+.form-panel{display:none;background:var(--surface2);border-top:1px solid var(--border);padding:10px 12px 12px;}
+.ex.form-open .form-panel{display:block;}
+.fg{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;}
+.cue-hd{font-family:var(--mono);font-size:8px;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:5px;padding-bottom:4px;border-bottom:1px solid var(--border);color:var(--muted);}
+.cue-hd.s{color:var(--accent2);border-color:rgba(0,184,240,0.15);}
+.cue-hd.e{color:var(--green);border-color:rgba(0,232,150,0.15);}
+.cue-hd.b{color:var(--purple);border-color:rgba(139,92,246,0.15);}
+.cue-hd.m{color:var(--warn);border-color:rgba(255,61,0,0.15);}
+.cl{list-style:none;}
+.cl li{font-size:10.5px;color:#a0a0be;line-height:1.5;padding:2px 0 2px 12px;position:relative;}
+.cl li::before{content:'—';position:absolute;left:0;color:var(--border2);font-size:9px;}
+.cl li.k::before{content:'›';color:var(--accent);}
+.cl li.k{color:var(--text);}
+.cl li.x::before{content:'✗';color:var(--warn);}
+.cl li.x{color:#a07060;}
+.cl li.sh::before{content:'⟳';color:var(--accent2);}
+.cl li.sh{color:#80a0c0;}
+.tempo-r{display:flex;align-items:center;gap:5px;flex-wrap:wrap;padding-top:8px;border-top:1px solid var(--border);}
+.tempo-l{font-family:var(--mono);font-size:8px;color:var(--muted);letter-spacing:1px;}
+.tb{background:var(--surface3);border:1px solid var(--border2);border-radius:3px;padding:3px 7px;text-align:center;min-width:35px;}
+.tn{font-family:var(--cond);font-size:15px;font-weight:700;color:var(--accent);line-height:1;}
+.tp{font-family:var(--mono);font-size:7px;color:var(--muted);}
+.ts{color:var(--border2);font-size:10px;}
+
+/* LOG */
+.log-sec{border-top:1px solid var(--border);background:var(--bg2);padding:8px 12px 10px;}
+.log-ttl{font-family:var(--mono);font-size:8px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:6px;}
+.set-rows{display:flex;flex-direction:column;gap:4px;}
+.set-row{display:grid;grid-template-columns:18px 1fr 1fr 48px auto;align-items:center;gap:4px;}
+.sn{font-family:var(--mono);font-size:9px;color:var(--muted);text-align:center;}
+.si{background:var(--surface3);border:1px solid var(--border2);border-radius:4px;padding:3px 2px;font-family:var(--mono);font-size:16px;color:var(--text);width:100%;-webkit-appearance:none;text-align:center;}
+.si:focus{outline:none;border-color:var(--accent);}
+.si::placeholder{color:var(--muted);}
+.rs{background:var(--surface3);border:1px solid var(--border2);border-radius:4px;padding:3px 0;font-family:var(--mono);font-size:16px;color:var(--text2);width:100%;cursor:pointer;text-align:center;-webkit-appearance:none;appearance:none;}
+.rs:focus{outline:none;border-color:var(--accent);}
+.sv{font-family:var(--mono);font-size:8px;letter-spacing:1px;background:var(--adim);border:1px solid rgba(200,240,0,0.25);color:var(--accent);padding:6px 7px;border-radius:4px;cursor:pointer;white-space:nowrap;transition:all 0.15s;}
+.sv:hover{background:rgba(200,240,0,0.16);}
+.sv.saved{background:var(--gdim);border-color:rgba(0,232,150,0.3);color:var(--green);}
+.ni{width:100%;background:var(--surface3);border:1px solid var(--border);border-radius:4px;padding:5px 7px;font-family:'Barlow',sans-serif;font-size:11px;font-weight:300;color:var(--text2);resize:none;min-height:26px;margin-top:4px;}
+.ni:focus{outline:none;}
+.ni::placeholder{color:var(--muted);}
+
+/* SPECIAL BLOCKS */
+.cond-card{background:var(--surface2);border:1px solid var(--border);border-left:3px solid var(--accent2);border-radius:0 6px 6px 0;padding:11px 13px;margin-bottom:6px;}
+.cond-ttl{font-family:var(--mono);font-size:8px;letter-spacing:2px;text-transform:uppercase;color:var(--accent2);margin-bottom:5px;}
+.cond-card p{font-size:12px;color:var(--text2);line-height:1.65;}
+.cond-card p strong{color:var(--text);font-weight:500;}
+.fin-card{background:var(--surface);border:1px solid var(--border);border-top:2px solid var(--warn);border-radius:0 0 6px 6px;padding:12px;margin-top:3px;}
+.fin-ttl{font-family:var(--cond);font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--warn);margin-bottom:6px;}
+.fin-card p,.cool-card p{font-size:11.5px;color:var(--text2);line-height:1.7;}
+.fin-card p strong,.cool-card p strong{color:var(--text);font-weight:500;}
+.cool-card{background:var(--surface);border:1px solid var(--border);border-top:2px solid var(--green);border-radius:0 0 6px 6px;padding:12px;margin-top:3px;}
+.cool-ttl{font-family:var(--cond);font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--green);margin-bottom:6px;}
+
+/* DASHBOARD */
+.dg{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;}
+.sc{background:var(--surface);border:1px solid var(--border);border-radius:7px;padding:12px;}
+.sc.full{grid-column:1/-1;}
+.sc.ac{border-color:rgba(200,240,0,0.2);background:var(--adim);}
+.sl{font-family:var(--mono);font-size:8px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:4px;}
+.sv2{font-family:var(--cond);font-size:28px;font-weight:900;color:var(--accent);line-height:1;}
+.sv2.bl{color:var(--accent2);}
+.sv2.gr{color:var(--green);}
+.sv2.go{color:var(--gold);}
+.ssub{font-size:11px;color:var(--text2);margin-top:3px;}
+.bw-row{display:flex;gap:6px;margin-top:8px;align-items:center;}
+.bw-i{background:var(--surface3);border:1px solid var(--border2);border-radius:4px;padding:6px 8px;font-family:var(--mono);font-size:12px;color:var(--text);width:90px;text-align:center;}
+.bw-i:focus{outline:none;border-color:var(--accent);}
+.bw-s{font-family:var(--mono);font-size:8px;letter-spacing:1px;text-transform:uppercase;background:var(--adim);border:1px solid rgba(200,240,0,0.3);color:var(--accent);padding:6px 10px;border-radius:4px;cursor:pointer;}
+.trend-c{height:52px;display:flex;align-items:flex-end;gap:3px;padding:3px 0;}
+.tb2{flex:1;border-radius:2px 2px 0 0;min-height:4px;background:var(--adim);border:1px solid rgba(200,240,0,0.12);}
+.tb2.cur{background:var(--accent);}
+.tb2.lo{background:var(--gdim);border-color:rgba(0,232,150,0.2);}
+.macro-r{display:flex;gap:10px;flex-wrap:wrap;margin-top:9px;}
+.mi{text-align:center;flex:1;min-width:50px;}
+.mn{font-family:var(--cond);font-size:19px;font-weight:700;}
+.mu{font-family:var(--mono);font-size:7px;color:var(--muted);letter-spacing:1px;}
+hr.dv{border:none;border-top:1px solid var(--border);margin:12px 0;}
+
+/* SUPPS */
+.sb{background:var(--surface);border:1px solid var(--border);border-radius:7px;overflow:hidden;margin-bottom:8px;}
+.sb-hdr{display:flex;align-items:center;gap:9px;padding:10px 12px;border-bottom:1px solid var(--border);}
+.sb-icon{font-size:17px;}
+.sb-name{font-family:var(--cond);font-size:14px;font-weight:700;text-transform:uppercase;}
+.sb-tag{font-family:var(--mono);font-size:8px;letter-spacing:1px;padding:2px 6px;border-radius:2px;margin-left:auto;}
+.sb-list{padding:9px 12px 12px;display:flex;flex-direction:column;gap:7px;}
+.si2{display:flex;align-items:flex-start;gap:8px;}
+.sdot{width:6px;height:6px;border-radius:50%;flex-shrink:0;margin-top:5px;}
+.si2-name{font-size:12px;font-weight:500;margin-bottom:1px;}
+.si2-why{font-size:10.5px;color:var(--text2);line-height:1.5;}
+.si2-why strong{color:var(--text);font-weight:500;}
+.si2-dose{font-family:var(--mono);font-size:8.5px;color:var(--accent);margin-top:2px;letter-spacing:0.5px;}
+.enh{background:var(--goldim);border:1px solid rgba(240,165,0,0.2);border-radius:7px;padding:12px;margin-top:8px;}
+.enh-ttl{font-family:var(--cond);font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--gold);margin-bottom:8px;}
+.enh-i{display:flex;align-items:flex-start;gap:7px;margin-bottom:7px;}
+.enh-i:last-child{margin-bottom:0;}
+
+/* STATUS */
+.status{position:fixed;bottom:0;left:0;right:0;background:var(--bg2);border-top:1px solid var(--border);padding:6px 14px;display:flex;align-items:center;justify-content:space-between;gap:8px;z-index:49;flex-wrap:wrap;}
+.sti{display:flex;align-items:center;gap:5px;font-family:var(--mono);font-size:8px;color:var(--muted);letter-spacing:1px;}
+.std{width:5px;height:5px;border-radius:50%;background:var(--muted);}
+.std.gr{background:var(--green);box-shadow:0 0 5px var(--green);}
+.std.wn{background:var(--warn);}
+.stv{color:var(--text2);}
+.toast{position:fixed;bottom:44px;right:12px;background:var(--surface3);border:1px solid var(--border2);border-left:3px solid var(--green);padding:7px 12px;border-radius:4px;font-family:var(--mono);font-size:9px;color:var(--green);letter-spacing:1px;z-index:300;transform:translateX(200%);transition:transform 0.2s;pointer-events:none;}
+.toast.show{transform:translateX(0);}
+.toast.err{border-left-color:var(--warn);color:var(--warn);}
+
+@media(max-width:480px){
+  .fg{grid-template-columns:1fr;}
+  .wu-grid{grid-template-columns:1fr;}
+  .dg{grid-template-columns:1fr;}
+  .set-row{grid-template-columns:16px 1fr 1fr auto;}
+  .rs{display:none;}
+  .day-grid{grid-template-columns:repeat(5,1fr);}
 }
 </style>
 </head>
 <body>
-<div class="container">
 
-<!-- HEADER -->
-<header class="site-header">
-  <div class="header-left">
-    <div class="site-title">STRENGTH<br><span class="accent">TRACK</span><span class="dim">ER</span></div>
-    <div class="site-sub">6-Day PPL · L2-S1 Safe · <span id="current-date">—</span></div>
+<div class="mantra">
+  <div class="mantra-h">No Ego</div>
+  <div class="mantra-q">"Kill your egos; this is better for you in the sight of your Creator..."</div>
+</div>
+
+<div class="wrap">
+
+<header class="hdr">
+  <div>
+    <div class="site-ttl">STR<span class="ac">ENGT</span><span class="dm">H</span><br><span class="ac">TRACK</span><span class="dm">ER</span></div>
+    <div class="site-sub">Recomp · L2-S1 Safe · <span id="cur-date">—</span></div>
   </div>
-  <div class="header-right">
-    <div class="deload-wrap" id="deload-wrap">
-      <span class="deload-label" id="deload-label">DELOAD</span>
-      <label class="toggle-switch">
-        <input type="checkbox" id="deload-toggle" onchange="handleDeload()">
-        <span class="toggle-slider"></span>
-      </label>
+  <div class="hdr-r">
+    <div class="dl-row" id="dl-row">
+      <span class="dl-lbl" id="dl-lbl">DELOAD</span>
+      <label class="tsw"><input type="checkbox" id="dl-tog" onchange="handleDeload()"><span class="ttr"></span></label>
     </div>
-    <button class="sheets-btn" onclick="toggleSheetConfig()">
-      ⬡ SHEETS CONFIG
-    </button>
-    <a class="sheets-btn" id="sheets-link" href="#" target="_blank" style="display:none">
-      ↗ OPEN SHEET
-    </a>
   </div>
 </header>
 
-<!-- SHEET CONFIG -->
-<div class="sheet-config" id="sheet-config">
-  <div class="sheet-config-title">Google Sheets Webhook URL</div>
-  <div style="font-size:11px;color:var(--muted);margin-bottom:10px;line-height:1.6;">
-    Paste your Google Apps Script Web App URL. New columns logged: Date, Day, Exercise, Set, Weight, Reps, RPE, Notes, Deload.<br>
-    <span style="color:var(--accent2);">Add these headers to your sheet: Date · Day · Exercise · Set # · Weight · Reps · RPE · Notes · Deload</span>
+<div class="nav">
+  <button class="ntab active" onclick="goTab('train')">Train</button>
+  <button class="ntab" onclick="goTab('dash')">Dashboard</button>
+  <button class="ntab" onclick="goTab('supps')">Supps</button>
+</div>
+
+<!-- REST TIMER -->
+<div class="rest-timer" id="rt">
+  <div class="rt-lbl">Rest Timer</div>
+  <div class="rt-ex" id="rt-ex">—</div>
+  <div class="rt-time" id="rt-time">1:30</div>
+  <div class="rt-track"><div class="rt-fill" id="rt-fill" style="width:100%"></div></div>
+  <div class="rt-btns">
+    <button class="rt-btn" id="rt-pause-btn" onclick="pauseTimer()">PAUSE</button>
+    <button class="rt-btn" onclick="resetTimer()">RESET</button>
+    <button class="rt-btn skip" onclick="skipTimer()">SKIP ›</button>
   </div>
-  <div class="sheet-row">
-    <input class="sheet-input" id="sheet-url-input" placeholder="https://script.google.com/macros/s/..." />
-    <button class="sheet-save-btn" onclick="saveSheetUrl()">SAVE</button>
+</div>
+
+<!-- TAB: TRAIN -->
+<div id="tab-train">
+  <div class="day-wrap">
+    <div class="day-lbl">Select Training Day</div>
+    <div class="day-grid" id="day-grid"></div>
   </div>
+  <div id="workout-area"></div>
 </div>
 
-<!-- DAY SELECTOR -->
-<div class="day-selector-wrap">
-  <div class="day-selector-label">Select Training Day</div>
-  <div class="day-selector" id="day-selector"></div>
-</div>
-
-<!-- MAIN WORKOUT AREA -->
-<div id="workout-area"></div>
-
-</div><!-- /container -->
-
-<!-- STATUS BAR -->
-<div class="status-bar">
-  <div class="status-item"><div class="status-dot green" id="status-dot"></div><span class="status-val" id="status-text">Ready</span></div>
-  <div class="status-item">SETS LOGGED TODAY: <span class="status-val" id="sets-logged">0</span></div>
-  <div class="status-item" id="deload-status" style="display:none"><div class="status-dot warn"></div><span style="color:var(--warn)">DELOAD ACTIVE — 60% TARGETS</span></div>
-</div>
-
-<!-- TOAST -->
-<div class="toast" id="toast">Set saved ✓</div>
-
-<script>
-// ═══════════════════════════════════════════════
-// DATA
-// ═══════════════════════════════════════════════
-
-const CYCLE = [
-  { id: 'push1', label: 'PUSH', sub: 'Chest · Shldrs · Tri' },
-  { id: 'pull1', label: 'PULL', sub: 'Back · Biceps' },
-  { id: 'legs1', label: 'LEGS', sub: 'Glute · Quad · Ham' },
-  { id: 'rest',  label: 'REST', sub: 'Cardio / Mobility', isRest: true },
-  { id: 'push2', label: 'PUSH', sub: 'Shldrs Heavy · Tri' },
-  { id: 'pull2', label: 'PULL', sub: 'Width · Arms' },
-  { id: 'legs2', label: 'LEGS', sub: 'Strength Focus' },
-  { id: 'rest2', label: 'REST', sub: 'Active Recovery', isRest: true },
-];
-
-const WARMUP = [
-  { num:'01', name:'Elliptical', time:'5 min', detail:'Moderate resistance. Full stride. No shortcuts.' },
-  { num:'02', name:'Cat-Cow', time:'2 min', detail:'Exhale to round, inhale to arch. 4 sec each way.' },
-  { num:'03', name:'90/90 Hip Stretch', time:'90 sec ea', detail:'Both knees at 90°. Breathe into the tight hip.' },
-  { num:'04', name:'Hip Flexor Lunge', time:'60 sec ea', detail:'Low lunge, rear knee down. Lift same-side arm.' },
-  { num:'05', name:'Glute Bridge', time:'2×15 reps', detail:'3-sec hold at top. Wake up glutes before loading.' },
-  { num:'06', name:'Dead Bug', time:'2×10 reps', detail:'Lower back flat to floor throughout. Slow.' },
-];
-
-const WORKOUTS = {
-  push1: {
-    title: 'PUSH — CHEST, SHOULDERS, TRICEPS',
-    tags: [['Compound + Isolation','accent'],['65 min',''],['Shoulder Focus','green']],
-    exercises: [
-      {
-        id:'p1-idbp', name:'Incline DB Press', muscle:'Upper chest · Anterior delt · Tricep',
-        target:'4 × 10–12', rest:'75s', spine: false,
-        setup:['Bench at 30–45°. DBs kicked up as you lie back. Feet flat, slight upper back arch.',
-               'Retract and depress scapulae into the bench before rep 1 — hold that position.',
-               'key:Elbows at 60° from torso — not flared to 90°. Lock this angle before every set.'],
-        exec:['Lower to chest with control. Touch lightly — no bounce.',
-              'key:Press up and in — DBs travel toward each other at the top. Full lockout, stay tense.',
-              'Re-brace core between every rep. Don\'t rest at the top.'],
-        breath:['key:Inhale and brace on the way down. Exhale forcefully on the press. Every rep.'],
-        mistakes:['bad:Elbows flaring to 90° — shoulder impingement waiting to happen.',
-                  'bad:Bouncing off the chest — ego, not muscle.',
-                  'bad:Lower back arching off bench — ribs stay down.'],
-        tempo:['3','1','1','0'], tempoLabels:['Down','Pause','Up','Top']
-      },
-      {
-        id:'p1-cfly', name:'Cable Fly (flat)', muscle:'Chest peak contraction · Pec minor',
-        target:'3 × 12–15', rest:'60s', spine: false,
-        setup:['Cables at chest height. Slight forward lean from hips — chest proud, back neutral.',
-               'key:Soft bend in elbows — lock this angle in before rep 1. It never changes.'],
-        exec:['key:Think "hugging a barrel." Arc the arms — don\'t pull. It\'s a rotation, not a press.',
-              'Let arms open fully — feel the complete pec stretch at the back position.',
-              'Squeeze hard at center. Pause 1 second. 3-second controlled return.'],
-        breath:['Inhale as you open and stretch. Exhale as you close and squeeze. Hold the squeeze.'],
-        mistakes:['bad:Too much elbow bend — becomes a press. Lock that soft bend and keep it.',
-                  'bad:Not letting arms open fully — skips the stretch hypertrophy stimulus.',
-                  'bad:Leaning so far forward the lower back rounds.'],
-        tempo:['3','1','1','1'], tempoLabels:['Open','Stretch','Close','Squeeze']
-      },
-      {
-        id:'p1-sdbsp', name:'Seated DB Shoulder Press', muscle:'All 3 delt heads · Tricep · Upper trap',
-        target:'4 × 10–12', rest:'75s', spine: true,
-        setup:['Seat at 90°. Sit tall, spine neutral. DBs at shoulder height, palms forward.',
-               'key:Core braced before every single rep — the L2-S1 protection mechanism.'],
-        exec:['Drive elbows slightly forward — not directly out to the sides (impingement risk).',
-              'key:Press to just short of lockout. Keep tension on delts. Re-brace every rep.',
-              'Lower under full control. Stop at parallel — don\'t go below shoulder.'],
-        breath:['key:Inhale and brace before the press. Exhale as you push. Re-brace at the bottom.'],
-        mistakes:['bad:Arching lower back to get the weight up — reduce the load.',
-                  'bad:Elbows flaring straight out to the sides — rotate them slightly forward.',
-                  'bad:Shrugging traps — keep them depressed, create space in the neck.'],
-        tempo:['2','0','2','0'], tempoLabels:['Down','—','Up','Top']
-      },
-      {
-        id:'p1-dlr', name:'DB Lateral Raise', muscle:'Medial deltoid — the width muscle',
-        target:'3 × 15', rest:'45s', spine: false,
-        setup:['Stand or sit. Slight forward lean 15–20° from hips — seats the medial delt.',
-               'key:Go light. Lateral raises are isolation — ego destroys form every time.',
-               'Soft elbow bend locked in. Pinky slightly higher than thumb.'],
-        exec:['key:Lead with the elbow, not the hand. Think "show your armpit."',
-              'Raise to just above shoulder height — not higher (traps take over above that).',
-              'Pause 1 second at top. 3-second lower. No shrugging, no swinging.'],
-        breath:['Exhale on the raise. Inhale on the 3-second lowering. Stay controlled.'],
-        mistakes:['bad:Shrugging traps — defeats the entire exercise.',
-                  'bad:Using momentum to swing up — training ego, not deltoid.',
-                  'bad:Thumbs higher than pinkies — loses medial delt activation.',
-                  'bad:Raising past shoulder height — trap takes over.'],
-        tempo:['3','1','1','0'], tempoLabels:['Down','Top','Up','Bottom']
-      },
-      {
-        id:'p1-ote', name:'Overhead Tricep Extension (cable rope, seated)', muscle:'Tricep long head — stretched position',
-        target:'3 × 12', rest:'60s', spine: true,
-        setup:['Seated — protects L2-S1. Rope overhead or one DB held with both hands.',
-               'key:Upper arms vertical and glued beside your ears. They do not move at all.'],
-        exec:['key:Only forearms move. Upper arms are fixed pillars. Deep stretch = long head growth.',
-              'Extend to near lockout. Squeeze tricep 1 second. Lower slowly into full stretch.'],
-        breath:['Exhale as you extend. Inhale slowly into the overhead stretch. Feel it.'],
-        mistakes:['bad:Elbows flaring out wide — long head disengages immediately.',
-                  'bad:Standing and arching lower back to push the weight.',
-                  'bad:Not going deep enough behind the head — short ROM, short gains.'],
-        tempo:['3','1','2','1'], tempoLabels:['Down','Stretch','Up','Squeeze']
-      },
-      {
-        id:'p1-tpd', name:'Tricep Pushdown (rope)', muscle:'All 3 tricep heads · Lateral head finisher',
-        target:'3 × 15', rest:'45s', spine: false,
-        setup:['High cable, rope. Stand close. Slight forward hinge from hips.',
-               'key:Upper arms pinned to ribs. Elbows directly under shoulders — not in front.'],
-        exec:['Push rope down and flare handles apart at the bottom simultaneously.',
-              'key:Externally rotate wrists at full extension — squeezes the lateral head hard. Hold 1 sec.',
-              'Let hands rise above elbow height at the top for long head stretch between reps.'],
-        breath:['Exhale and push down. Inhale on the return. Keep breathing throughout.'],
-        mistakes:['bad:Upper arms drifting forward as weight rises — elbows stay pinned to ribs.',
-                  'bad:Leaning forward and using bodyweight — arms are doing this, not torso.',
-                  'bad:Not separating the rope at the bottom — that\'s the peak contraction.'],
-        tempo:['—','—','—','—'], tempoLabels:['—','—','—','—']
-      },
-    ],
-    finisher: 'Face Pull burnout — 3×20, light, strict external rotation. Then: 5×5 push-up countdown: 5 reps, rest 10s, 4 reps, rest 10s... down to 1. Total time under 6 minutes.',
-    cooldown: 'Chest doorway stretch 60 sec each · Cross-body shoulder stretch 45 sec each · Overhead tricep stretch 45 sec each · Child\'s pose 90 sec.'
-  },
-
-  pull1: {
-    title: 'PULL — BACK & BICEPS',
-    tags: [['Width + Thickness','blue'],['65 min',''],['Posture Builder','green']],
-    exercises: [
-      {
-        id:'pl1-lpd', name:'Lat Pulldown (wide overhand)', muscle:'Latissimus dorsi · Teres major · Biceps',
-        target:'4 × 10–12', rest:'75s', spine: false,
-        setup:['Wide overhand grip just outside shoulder width. Lean back 10–15°.',
-               'key:Depress scapulae before the first pull — "put shoulder blades in back pockets."'],
-        exec:['key:Think "pull elbows to hip pockets" — not "pull the bar down." Chin to upper chest.',
-              'Fully extend arms at top — full lat stretch before every rep.',
-              '3-second controlled ascent — don\'t let it snap back.'],
-        breath:['Exhale and brace on the pull. Inhale slowly all the way back up to full extension.'],
-        mistakes:['bad:Not fully extending at the top — cuts lat stretch in half.',
-                  'bad:Pulling behind the neck — cervical spine injury risk.',
-                  'bad:Initiating with biceps — lats and scapulae start every rep.'],
-        tempo:['3','0','2','1'], tempoLabels:['Up','Top','Down','Chest']
-      },
-      {
-        id:'pl1-scr', name:'Seated Cable Row (close grip)', muscle:'Mid-back · Rhomboids · Lower traps · Biceps',
-        target:'3 × 12', rest:'75s', spine: true,
-        setup:['V-bar or close handle. Sit tall — spine neutral. Slight forward lean at start only (15°).',
-               'key:Today keep torso more upright than you want to. Row with the arms, not the back.'],
-        exec:['Drive elbows back. Squeeze scapulae hard at the end of each rep. Full extension on return.',
-              'key:Torso stays still — only arms move. Zero rocking.'],
-        breath:['Brace core before each pull. Exhale as you row. Inhale on the return.'],
-        mistakes:['bad:Rocking torso back and forth — momentum, not muscle.',
-                  'bad:Rounding lower back at the stretch — stay braced throughout.',
-                  'bad:Not fully extending arms — skips the lat stretch entirely.'],
-        tempo:['3','1','2','1'], tempoLabels:['Out','Bottom','In','Squeeze']
-      },
-      {
-        id:'pl1-csdr', name:'Chest-Supported DB Row', muscle:'Upper back · Rhomboids · Rear delt — zero spinal load',
-        target:'3 × 12', rest:'75s', spine: true,
-        setup:['Face down on 45° incline bench. Chest supported, arms hanging straight down.',
-               'key:Best row for L2-S1 — the bench eliminates all spinal erector loading entirely.'],
-        exec:['key:Row elbows HIGH and wide — toward the ceiling, not toward hips. Upper back + rear delt.',
-              'Squeeze scapulae hard at the top. Hold 1 second. Full hang at the bottom.'],
-        breath:['Exhale as you row up. Inhale as you lower to the full hang position.'],
-        mistakes:['bad:Chest lifting off bench — defeats the entire purpose of this variation.',
-                  'bad:Elbows pulling toward hips — that\'s a lat row, not an upper back row.'],
-        tempo:['3','1','2','1'], tempoLabels:['Down','Bottom','Up','Squeeze']
-      },
-      {
-        id:'pl1-fp', name:'Face Pull (rope)', muscle:'Rear deltoid · External rotators · Rhomboids',
-        target:'3 × 15', rest:'45s', spine: false,
-        setup:['Rope at face height or above. Overhand grip, thumbs pointing back.',
-               'key:This is about external rotation quality — not weight. If it looks like a row, it\'s too heavy.'],
-        exec:['Pull toward forehead. Elbows flare OUT and UP as you pull.',
-              'key:End position: upper arms parallel to floor, forearms vertical, wrists behind ears. Hold 1 sec.',
-              'Squeeze rear delts and retract scapulae hard at peak.'],
-        breath:['Exhale as you pull and rotate. Inhale on the controlled return.'],
-        mistakes:['bad:Pulling to the chin — completely wrong muscles and pattern.',
-                  'bad:Too heavy — becomes a horizontal row with zero external rotation.',
-                  'bad:Skipping this — most important shoulder health movement in the plan.'],
-        tempo:['—','—','—','—'], tempoLabels:['—','—','—','—']
-      },
-      {
-        id:'pl1-idbc', name:'Incline DB Curl', muscle:'Bicep long head — peak builder via stretch',
-        target:'3 × 12', rest:'60s', spine: false,
-        setup:['Bench at 45–60°. Sit back, arms hang fully behind the torso plane.',
-               'key:This angle stretches the bicep long head — the primary driver of peak development. Go light.'],
-        exec:['Supinate wrist throughout the curl — feel the peak fire at the top.',
-              'key:Lower to a full hang every rep. The hanging position is the most valuable part.',
-              'Upper arms stay behind torso plane — any forward swing is momentum, not muscle.'],
-        breath:['Exhale and curl. Inhale as you lower all the way back to the full hang.'],
-        mistakes:['bad:Elbows swinging forward at the top — upper arms must stay behind torso plane.',
-                  'bad:Not lowering to full hang — skips the entire stretch benefit.',
-                  'bad:Too heavy and swinging — this is peak isolation work.'],
-        tempo:['3','1','2','1'], tempoLabels:['Down','Stretch','Curl','Peak']
-      },
-      {
-        id:'pl1-hc', name:'DB Hammer Curl', muscle:'Brachialis · Brachioradialis — arm thickness',
-        target:'3 × 12', rest:'60s', spine: false,
-        setup:['Stand or sit. Neutral grip (thumbs up). DBs at sides, elbows pinned to ribs.',
-               'key:Brachialis sits under the bicep. Building it pushes the peak up — real arm density.'],
-        exec:['Curl with neutral wrist — do NOT supinate at any point. Keep hammer grip throughout.',
-              'key:3-second eccentric. That\'s where brachialis hypertrophy lives.',
-              'Alternate arms or both — either works. Elbows stay pinned the entire set.'],
-        breath:['Exhale on the curl. Inhale on the 3-second lowering.'],
-        mistakes:['bad:Supinating the wrist midway — turns it into a regular curl, loses brachialis.',
-                  'bad:Elbows swinging forward — stay pinned to ribs.'],
-        tempo:['3','1','1','0'], tempoLabels:['Down','Bottom','Up','Top']
-      },
-    ],
-    finisher: '21s EZ-bar Curl: 7 reps bottom half → 7 top half → 7 full reps. One set only. Controlled pump, not a strength set. Then: Cable rear delt fly 2×20 — light, full ROM.',
-    cooldown: 'Doorway bicep stretch 60 sec each arm · Lat stretch (hang from bar) 45 sec · Child\'s pose 90 sec · Thread the needle 45 sec each.'
-  },
-
-  legs1: {
-    title: 'LEGS — GLUTE, QUAD, HAMSTRING',
-    tags: [['L2-S1 Adapted','warn'],['65 min',''],['Glute Priority','green']],
-    exercises: [
-      {
-        id:'l1-cpt', name:'Cable Pull-Through', muscle:'Glutes · Hamstrings — hip hinge primer',
-        target:'3 × 15', rest:'60s', spine: true,
-        setup:['Low cable, rope. Stand facing away, feet straddle cable.',
-               'key:Cable pulls backward not downward — dramatically reduces spinal compression vs any deadlift.'],
-        exec:['Hinge hips back — spine stays in natural neutral curve. Arms just hold rope, they don\'t pull.',
-              'key:Drive hips forward explosively. Squeeze glutes hard at the top. Don\'t hyperextend.'],
-        breath:['Inhale and brace on the hinge back. Exhale forcefully as hips drive forward.'],
-        mistakes:['bad:Squatting instead of hinging — hips go BACK, not down.',
-                  'bad:Rounding lower back on the hinge — highest-risk mistake for L2-S1.',
-                  'bad:Hyperextending at the top — glute squeeze, not back arch.'],
-        tempo:['—','—','—','—'], tempoLabels:['—','—','—','—']
-      },
-      {
-        id:'l1-ht', name:'Hip Thrust (barbell or machine)', muscle:'Glutes — most effective glute exercise',
-        target:'4 × 12', rest:'75s', spine: true,
-        setup:['Upper back against bench at mid-scapula — not neck, not shoulder blades.',
-               'Feet flat, shoulder-width. Barbell or pad in hip crease.',
-               'key:Chin tucked to chest throughout — prevents lower back hyperextension at the top.'],
-        exec:['Drive through heels. Rise until straight line from shoulder to knee.',
-              'key:Posterior pelvic tilt at the top — tuck pelvis under. Maximizes glute contraction AND protects L2-S1.',
-              '2-second hold at the top. Lower slowly — hips don\'t rest between reps.'],
-        breath:['Inhale and brace before each rep. Exhale as you drive up. Hold brace during 2-sec squeeze.'],
-        mistakes:['bad:Hyperextending lower back at top — glute exercise, not a back extension.',
-                  'bad:Feet too far out — shifts load to hamstrings.',
-                  'bad:No 2-second pause — the isometric contraction is half the exercise\'s value.',
-                  'bad:Chin not tucked — the moment chin rises, lower back tends to hyperextend.'],
-        tempo:['2','2','1','0'], tempoLabels:['Down','Squeeze','Up','Bottom']
-      },
-      {
-        id:'l1-gs', name:'Goblet Squat (DB/KB)', muscle:'Quads · Glutes · Hip flexors',
-        target:'4 × 12', rest:'75s', spine: true,
-        setup:['DB or KB at chest, cupped grip. Feet shoulder-width, toes 30° out.',
-               'key:The counterweight allows upright torso at depth — why this is spine-safe for L2-S1.'],
-        exec:['Sit between your legs — not behind them. Push knees out over toes. Chest stays tall.',
-              'key:Only go as deep as back stays neutral. Stop before butt wink. Drive through full foot on ascent.'],
-        breath:['Inhale and brace before each descent. Exhale forcefully as you drive back up.'],
-        mistakes:['bad:Chest caving forward — weight too heavy or ankles too tight.',
-                  'bad:Knees caving inward — push them out actively every rep.',
-                  'bad:Going deeper than mobility allows — butt wink = L2-S1 under flexion load.'],
-        tempo:['3','1','1','0'], tempoLabels:['Down','Bottom','Up','Top']
-      },
-      {
-        id:'l1-lp', name:'Leg Press (moderate foot position)', muscle:'Quads · Glutes — volume builder',
-        target:'3 × 15', rest:'75s', spine: true,
-        setup:['Feet mid-platform, shoulder-width. Toes slightly out. Back fully against pad.',
-               'key:Range of motion controlled — don\'t go so deep that lower back rounds off the pad.'],
-        exec:['Push through full foot — heel, mid, ball. Extend to nearly full lockout, don\'t hard lock.',
-              '3-second controlled descent. Volume is the goal — not max load.'],
-        breath:['Inhale and brace as sled comes toward you. Exhale and push. Re-brace each rep.'],
-        mistakes:['bad:Lower back peeling off pad on descent — reduce ROM immediately.',
-                  'bad:Hard knee lockout — keeps stress on joint, removes quad tension.',
-                  'bad:Knees caving inward — push them out in line with toes throughout.'],
-        tempo:['3','1','1','0'], tempoLabels:['Down','Bottom','Up','Top']
-      },
-      {
-        id:'l1-lc', name:'Seated Leg Curl', muscle:'Hamstrings — eccentric focus',
-        target:'3 × 15', rest:'60s', spine: true,
-        setup:['Pad just above heel. Back fully against seat. Thigh pad snug.',
-               'key:Seated preferred for L2-S1 — back is supported, zero prone spinal load.'],
-        exec:['Start at full extension every rep — always.',
-              'key:3-second eccentric. Hamstring hypertrophy lives in the lengthened position under load.',
-              'Plantarflex foot at peak (point toes slightly) — increases recruitment noticeably. Squeeze 1 sec.'],
-        breath:['Exhale as you curl. Inhale slowly through the full 3-second eccentric.'],
-        mistakes:['bad:Dropping weight fast — throwing away the primary growth stimulus.',
-                  'bad:Not starting from full extension every rep.',
-                  'bad:Hips rising off seat — reduce weight if this happens.'],
-        tempo:['3','1','1','1'], tempoLabels:['Down','Bottom','Curl','Squeeze']
-      },
-    ],
-    finisher: 'Glute burnout — Single-leg glute bridge: 25 reps each side, bodyweight, 2-second hold at top. No rest between sides. Then: Calf raise drop set — 15 reps heavy, drop 40%, 15 more, drop again, 15 more.',
-    cooldown: '90/90 hip stretch 90 sec each · Pigeon pose 90 sec each · Hip flexor lunge stretch 60 sec each · Seated hamstring stretch 60 sec each · Child\'s pose 2 min.'
-  },
-
-  rest: {
-    type: 'cardio',
-    title: 'CARDIO DAY',
-    machines: [
-      {
-        icon:'🚣',
-        name:'Rowing Ergometer',
-        protocol:'<strong>Warm-up:</strong> 5 min easy · <strong>Main:</strong> 4×500m at 85% effort, 90s rest between · <strong>Cool-down:</strong> 5 min easy. Total ~28 min. Focus on legs-drive-finish sequence. Keep strokes per minute 22–26.'
-      },
-      {
-        icon:'⬡',
-        name:'Elliptical',
-        protocol:'<strong>Steady State:</strong> 25 min at conversational pace, resistance 7–10. OR <strong>HIIT:</strong> 20×(40s hard / 20s easy). Full stride, drive through heels, upright posture throughout.'
-      },
-      {
-        icon:'🏔',
-        name:'Stair Master',
-        protocol:'<strong>Warm-up:</strong> 3 min easy · <strong>Main:</strong> 20 min at level 8–12, steady pace · <strong>Surge sets:</strong> Every 5 min, go hard for 30 seconds, recover. Hands lightly on rails — don\'t lean. Drives glutes and cardiovascular base simultaneously.'
-      }
-    ],
-    note: 'Choose 1–2 machines. Total cardio time 25–40 min. Follow with full mobility sequence: Cat-Cow · 90/90 hips · Hip flexor lunge · Glute bridge · Dead bug.'
-  },
-
-  push2: {
-    title: 'PUSH — SHOULDERS HEAVY + CHEST',
-    tags: [['Shoulder Priority','accent'],['65 min',''],['Arm Finishing','green']],
-    exercises: [
-      {
-        id:'p2-ap', name:'Arnold Press', muscle:'All 3 deltoid heads — full rotation arc',
-        target:'4 × 10', rest:'75s', spine: true,
-        setup:['Seated. DBs at shoulder height, palms facing YOU at the start — internally rotated.',
-               'key:Starts internally rotated, ends externally rotated. Hits all 3 heads in one arc.',
-               'Core braced before every rep. Lighter than your standard press — control over load.'],
-        exec:['Press up while continuously rotating forearms — palms face AWAY at the top.',
-              'key:The rotation is smooth and continuous — not two separate steps. Draw a half-circle with each hand.',
-              'Fully reverse on descent — palms face you at the bottom. Control the lowering.'],
-        breath:['key:Brace core on inhale before each rep. Exhale as you press and rotate.'],
-        mistakes:['bad:Too heavy — lose the rotation, becomes a standard press.',
-                  'bad:Arching lower back to press the weight.',
-                  'bad:Rushing the rotation — the arc of motion IS the exercise.',
-                  'bad:Elbows flaring wide at the start — keep them slightly in front of shoulder plane.'],
-        tempo:['3','0','2','0'], tempoLabels:['Down','—','Up','—']
-      },
-      {
-        id:'p2-clrds', name:'Cable Lateral Raise + DB Drop Set', muscle:'Medial delt — maximum width stimulus',
-        target:'3 × 15+10', rest:'60s', spine: false,
-        setup:['Low cable, D-handle. Stand sideways. Arm crosses body to grab — gives constant tension at bottom.',
-               'key:The cross-body start provides tension where DBs have none. That\'s the cable\'s entire advantage.'],
-        exec:['Cable: raise to shoulder height leading with elbow. Pinky higher than thumb. 3-sec lower.',
-              'key:Immediately grab light DBs. 10 more reps strict. No shrugging. No momentum.',
-              'The pre-exhaustion makes those 10 DB reps brutally effective at light weight.'],
-        breath:['Exhale on every raise. Inhale on every lowering. Keep strict rhythm.'],
-        mistakes:['bad:Leaning away from cable — fix your torso, reduce the weight.',
-                  'bad:Raising above shoulder height — traps dominate above that point.',
-                  'bad:Going too heavy on the drop set DBs — accumulated fatigue is the goal.'],
-        tempo:['3','1','1','0'], tempoLabels:['Down','Top','Up','Bottom']
-      },
-      {
-        id:'p2-idbpflat', name:'Flat DB Press', muscle:'Mid chest · Anterior delt · Tricep',
-        target:'3 × 12', rest:'75s', spine: false,
-        setup:['Flat bench. DBs at chest level, elbows at 60° — same rule as incline.',
-               'Upper back arched slightly. Scapulae retracted and depressed before the first rep.'],
-        exec:['Lower with full control. Touch lightly. Press up and in toward each other.',
-              'key:Full lockout at top — then immediately start the next rep, keeping tension throughout.'],
-        breath:['Inhale and brace down. Exhale forcefully on the press.'],
-        mistakes:['bad:Elbows to 90° — shoulder impingement.',
-                  'bad:Wrists bending back — keep them stacked over elbows throughout.',
-                  'bad:Uncontrolled descent — the eccentric matters as much as the press.'],
-        tempo:['3','1','1','0'], tempoLabels:['Down','Pause','Up','Top']
-      },
-      {
-        id:'p2-dips', name:'Dips (bodyweight or assisted)', muscle:'Triceps · Lower chest · Anterior delt',
-        target:'3 × 10–15', rest:'75s', spine: false,
-        setup:['Parallel bars. Neutral wrist grip. Arms fully extended at start. Shoulders depressed.',
-               'key:For tricep focus: stay upright. For lower chest: lean slightly forward.'],
-        exec:['Lower until upper arms are parallel to floor — elbows at ~90°.',
-              'key:Shoulders stay depressed throughout — don\'t let them shrug up toward ears.',
-              'Press back to full extension. No stopping short at the top.'],
-        breath:['Inhale as you lower. Exhale as you press back up. Brace core throughout.'],
-        mistakes:['bad:Going past parallel — anterior shoulder capsule stress.',
-                  'bad:Elbows flaring wide — increases shoulder joint stress significantly.',
-                  'bad:Half reps — use assistance to achieve full ROM rather than cutting short.'],
-        tempo:['3','1','1','0'], tempoLabels:['Down','Bottom','Up','Top']
-      },
-      {
-        id:'p2-sc', name:'Skull Crusher (EZ bar)', muscle:'Tricep long head — mass builder',
-        target:'3 × 12', rest:'60s', spine: false,
-        setup:['Flat bench. EZ bar above upper chest, arms extended.',
-               'key:Upper arms angled slightly back toward head — not perfectly vertical. Reduces elbow stress.'],
-        exec:['Lower bar toward forehead by bending elbows only — upper arms stay completely still.',
-              'key:Stop just above forehead. Extend back up along the same arc. Brief lockout, feel the tricep contract.'],
-        breath:['Inhale as you lower toward forehead. Exhale as you extend back up.'],
-        mistakes:['bad:Elbows flaring out wide — reduces long head isolation, adds elbow stress.',
-                  'bad:Too heavy — elbows cave inward and the movement becomes dangerous.',
-                  'bad:Upper arms moving — they are fixed pillars. Only forearms move.'],
-        tempo:['3','1','2','1'], tempoLabels:['Down','Forehead','Up','Squeeze']
-      },
-    ],
-    finisher: 'Giant set x3, no rest between exercises: Pike push-up x12 → Lateral raise x15 → Tricep dip x12 → Rest 90s. Shoulders will be destroyed.',
-    cooldown: 'Chest opener doorway stretch 60 sec each · Cross-body shoulder stretch 45 sec each · Overhead tricep stretch 45 sec each · Cat-cow 1 min.'
-  },
-
-  pull2: {
-    title: 'PULL — BACK WIDTH & BICEP PEAK',
-    tags: [['V-Taper Focus','blue'],['65 min',''],['Arm Detail','green']],
-    exercises: [
-      {
-        id:'pl2-pu', name:'Pull-Up / Assisted Pull-Up', muscle:'Lats · Teres major · Rhomboids · Biceps',
-        target:'4 × max/8', rest:'90s', spine: false,
-        setup:['Overhand grip slightly wider than shoulders. Thumbs around the bar.',
-               'Dead hang to start — full extension, shoulders passively elevated.',
-               'key:Before rep 1: depress scapulae and engage lats. THEN pull. This is the difference.'],
-        exec:['key:Drive elbows DOWN and BACK — "elbows to hip pockets." Chin clears bar.',
-              'Slight forward lean and chest-to-bar intent = more lat, less bicep.',
-              'Return to full dead hang every rep. If reps drop to 3–4: switch to 5-sec negatives.'],
-        breath:['Exhale as you pull up. Inhale as you lower back to the full dead hang.'],
-        mistakes:['bad:Kipping or swinging — momentum replaces muscle entirely.',
-                  'bad:Not returning to full dead hang — the stretch is where lat is under max tension.',
-                  'bad:Chin craning up — pull the body, don\'t reach with the neck.'],
-        tempo:['3','0','2','1'], tempoLabels:['Up','Top','Down','Hang']
-      },
-      {
-        id:'pl2-ulpd', name:'Underhand Lat Pulldown', muscle:'Lower lat sweep · Biceps — V-taper lower line',
-        target:'3 × 12', rest:'75s', spine: false,
-        setup:['Supinated grip (palms facing you), shoulder-width.',
-               'key:This grip recruits lower lats heavily — what creates the lower V-taper sweep below the waist.'],
-        exec:['key:"Elbows to hip pockets" — the supinated grip makes this cue feel completely natural.',
-              'Bar to upper chest. Fully extend at top. 3-second controlled ascent every rep.'],
-        breath:['Exhale and brace on the pull. Inhale slowly all the way back up to full extension.'],
-        mistakes:['bad:Not fully extending at the top — misses the lower lat stretch entirely.',
-                  'bad:Leaning too far back — becomes a row, loses vertical pull mechanics.',
-                  'bad:Biceps initiating — scapulae depress first, elbows lead, biceps finish.'],
-        tempo:['3','0','2','1'], tempoLabels:['Up','Top','Down','Chest']
-      },
-      {
-        id:'pl2-sadr', name:'Single-Arm DB Row', muscle:'Lats · Rhomboids · Rear delt · Bicep — unilateral',
-        target:'3 × 12 ea', rest:'60s', spine: true,
-        setup:['Knee and hand of same side on bench. Opposite foot flat and wide on floor.',
-               'key:Spine parallel to the floor — flat and neutral. Check in the mirror. Any round = stop.'],
-        exec:['key:Drive elbow UP and BACK — not just "lift the weight up."',
-              'Elbow passes the torso at the top. Shoulder blade retracts at top, protracts at bottom.',
-              'Full hang at bottom. Full row at top. Big range of motion.'],
-        breath:['Exhale as you row up. Inhale as you lower back to the full hang.'],
-        mistakes:['bad:Rotating torso to complete the rep — reduces lat isolation significantly.',
-                  'bad:Rounded lower back — especially dangerous with unilateral loading.',
-                  'bad:Short range of motion — barely moving the arm.'],
-        tempo:['3','1','2','1'], tempoLabels:['Down','Bottom','Up','Squeeze']
-      },
-      {
-        id:'pl2-fp2', name:'Face Pull (rope)', muscle:'Rear deltoid · External rotators — every pull day',
-        target:'3 × 15', rest:'45s', spine: false,
-        setup:['Rope at face height or above. Overhand grip, thumbs back.',
-               'key:Light weight. If it looks like a horizontal row, it\'s too heavy. External rotation first.'],
-        exec:['Pull toward forehead. Elbows flare OUT and UP.',
-              'key:End: upper arms parallel, forearms vertical, wrists behind ears. Squeeze. Hold 1 sec.',
-              'Control the return — don\'t let cable snap arms forward.'],
-        breath:['Exhale on the pull and rotate. Inhale on controlled return.'],
-        mistakes:['bad:Pulling to chin — wrong muscles and movement pattern.',
-                  'bad:Too heavy — zero external rotation value when overloaded.',
-                  'bad:Elbows dropping below shoulder height at the peak.'],
-        tempo:['—','—','—','—'], tempoLabels:['—','—','—','—']
-      },
-      {
-        id:'pl2-pc', name:'Preacher Curl (EZ bar or machine)', muscle:'Bicep short head — peak isolation',
-        target:'3 × 10–12', rest:'60s', spine: false,
-        setup:['Upper arms flat on pad — cannot move at all.',
-               'key:The pad eliminates every possible cheat. Even moderate weight becomes brutally effective here.'],
-        exec:['Curl to near full contraction. Stop just before elbow locks out.',
-              'key:Lower fully and slowly to arm extension — dropping it fast = very high elbow injury risk.',
-              'Supinate wrists at top. Squeeze and hold 1 second.'],
-        breath:['Exhale and curl. Inhale slowly all the way back to full extension.'],
-        mistakes:['bad:Elbows lifting off pad — completely negates the exercise.',
-                  'bad:Dropping weight fast at bottom — extreme elbow joint stress.',
-                  'bad:Not lowering to full extension — skips the entire stretch stimulus.'],
-        tempo:['3','1','2','1'], tempoLabels:['Down','Bottom','Curl','Squeeze']
-      },
-      {
-        id:'pl2-cc', name:'Cable Curl + Reverse Curl Superset', muscle:'Bicep peak + Brachialis + Forearm',
-        target:'3 × 15+12', rest:'60s', spine: false,
-        setup:['Low cable. Stand close. Elbows pinned to ribs — they stay there for the entire superset.',
-               'key:Cable gives constant tension at the bottom that DBs cannot. Use the full ROM advantage.'],
-        exec:['Cable curl: supinate fully at top. Hold peak 1 second. Lower fully — feel the cable tension.',
-              'key:Reverse curl (no rest): switch to pronated overhand grip. 3-second eccentric. No supination.',
-              'Brachialis and brachioradialis hit hard with the reverse. Real arm thickness and forearm sweep.'],
-        breath:['Exhale on each curl. Inhale on each lowering. Maintain rhythm through both exercises.'],
-        mistakes:['bad:Elbows drifting forward on cable curl — they stay pinned.',
-                  'bad:Supinating on the reverse curl — defeats the entire purpose.',
-                  'bad:Rushing the transition — set the weight, reset the grip, then go.'],
-        tempo:['3','1','2','1'], tempoLabels:['Down','Bottom','Curl','Squeeze']
-      },
-    ],
-    finisher: '21s Curl (EZ bar): 7 bottom half → 7 top half → 7 full reps. One set only. Then: Lat hang — dead hang from bar for 30 seconds, twice. Decompress the spine after pulling.',
-    cooldown: 'Lat stretch (hang from bar) 45 sec · Doorway bicep stretch 60 sec each arm · Upper trap stretch 45 sec each · Child\'s pose 90 sec.'
-  },
-
-  legs2: {
-    title: 'LEGS — STRENGTH FOCUS',
-    tags: [['L2-S1 Adapted','warn'],['65 min',''],['Progressive Overload','accent']],
-    exercises: [
-      {
-        id:'l2-cpt', name:'Cable Pull-Through', muscle:'Glutes · Hamstrings — hip hinge opener always',
-        target:'3 × 15', rest:'60s', spine: true,
-        setup:['Low cable, rope. Facing away, feet straddle cable.',
-               'key:Always opens leg day. Primes posterior chain before any loading. Non-negotiable.'],
-        exec:['Hinge hips back — neutral spine throughout. Drive hips forward explosively.',
-              'key:Squeeze glutes hard at top. Don\'t hyperextend. Arms are just connectors.'],
-        breath:['Inhale and brace on hinge. Exhale forcefully on hip drive.'],
-        mistakes:['bad:Squatting instead of hinging — hips go BACK, not down.',
-                  'bad:Rounding lower back — most dangerous cue on this movement for L2-S1.',
-                  'bad:Too much weight — lose the hinge pattern immediately.'],
-        tempo:['—','—','—','—'], tempoLabels:['—','—','—','—']
-      },
-      {
-        id:'l2-ht', name:'Hip Thrust — Go Heavier', muscle:'Glutes — strength progression',
-        target:'4 × 10', rest:'90s', spine: true,
-        setup:['Upper back at mid-scapula. Feet flat, shoulder-width. Chin tucked throughout.',
-               'key:This is the strength session. Add weight from last cycle if Day 1 legs felt manageable.'],
-        exec:['key:Posterior pelvic tilt at top every single rep — tuck pelvis under. Non-negotiable.',
-              '2-second hold at peak. Lower under full control. Drive through heels.'],
-        breath:['Inhale and brace before each rep. Exhale driving up. Hold brace during squeeze.'],
-        mistakes:['bad:Hyperextending at top because you added weight — reduce load if form breaks.',
-                  'bad:No pause — the isometric contraction is the stimulus. Don\'t rush it.'],
-        tempo:['2','2','1','0'], tempoLabels:['Down','Squeeze','Up','Bottom']
-      },
-      {
-        id:'l2-bss', name:'Bulgarian Split Squat (DB)', muscle:'Quads · Glutes · Hip flexors — unilateral strength',
-        target:'4 × 10 ea', rest:'75s', spine: true,
-        setup:['Rear foot on bench. Front foot far enough forward that shin stays vertical.',
-               'key:Upright torso throughout — forward lean shifts load from glute to lower back. Stay tall.'],
-        exec:['Lower hips straight DOWN — not forward. Front knee tracks over 2nd toe.',
-              'Rear knee nearly grazes floor. Drive through front heel exclusively to stand.',
-              'key:This is a unilateral strength exercise. Progressive overload session — push the weight.'],
-        breath:['Inhale and brace before lowering. Exhale as you drive back up through the front heel.'],
-        mistakes:['bad:Torso leaning forward — most common mistake. Removes glute, loads lower back.',
-                  'bad:Front foot too close — knee drives past toes under heavy load.',
-                  'bad:Knee caving inward on the drive up — push it out actively every rep.'],
-        tempo:['3','1','1','0'], tempoLabels:['Down','Bottom','Up','Top']
-      },
-      {
-        id:'l2-rdl', name:'Romanian Deadlift — Light DBs ONLY', muscle:'Hamstrings · Glutes — hip hinge pattern',
-        target:'3 × 15', rest:'60s', spine: true,
-        setup:['Light DBs only. This is about motor pattern reinforcement — not load.',
-               'Feet hip-width. Micro-bend in knees locked in — doesn\'t change.',
-               'key:Spine in natural neutral curve throughout. Never flat, never rounded.'],
-        exec:['Push hips back toward the wall — DBs slide down the thighs, staying close.',
-              'key:Lower until strong hamstring stretch — typically mid-shin. Stop there every time.',
-              'Drive hips forward to return. Squeeze glutes at top. Don\'t hyperextend.'],
-        breath:['Inhale and brace before each hinge. Exhale as you drive hips forward to return.'],
-        mistakes:['bad:Rounding lower back at bottom — highest-risk moment for L2-S1 on any hinge.',
-                  'bad:Bending knees too much — turns into a squat, kills hamstring stretch.',
-                  'bad:Going heavy — pattern and feel are everything here. Load is irrelevant.'],
-        tempo:['3','1','1','1'], tempoLabels:['Down','Stretch','Up','Squeeze']
-      },
-      {
-        id:'l2-lc2', name:'Seated Leg Curl — Progressive', muscle:'Hamstrings — go heavier than Day 1',
-        target:'3 × 12', rest:'75s', spine: true,
-        setup:['Same setup as Day 1. But this is the progressive session — add weight if Day 1 felt manageable.',
-               'key:Seated always for L2-S1. Back fully supported. Thigh pad snug.'],
-        exec:['key:Full extension at start — always. 3-second eccentric — always. Plantarflex at peak — always.',
-              'These three cues are non-negotiable every rep of every set.'],
-        breath:['Exhale as you curl. Inhale through the full 3-second lowering.'],
-        mistakes:['bad:Dropping weight fast — the eccentric is the primary growth stimulus.',
-                  'bad:Hips rising off seat — reduce weight.',
-                  'bad:Skipping full extension at the start — always begin straight.'],
-        tempo:['3','1','1','1'], tempoLabels:['Down','Bottom','Curl','Squeeze']
-      },
-      {
-        id:'l2-cr', name:'Standing Calf Raise (machine or single DB)', muscle:'Gastrocnemius · Soleus',
-        target:'4 × 20', rest:'45s', spine: false,
-        setup:['Ball of foot on the edge. Full range of motion — heel below platform level at the bottom.',
-               'Single leg preferred — doubles the load and time under tension without adding weight.'],
-        exec:['Rise to full plantar flexion. Pause 1 second at top.',
-              'key:3-second lowering all the way to full stretch. Calves respond to slow, full-ROM reps — not bouncing.',
-              'Full stretch, full contraction, every single rep.'],
-        breath:['Exhale as you rise. Inhale through the 3-second controlled descent.'],
-        mistakes:['bad:Short ROM — barely dropping the heel. Calves need full stretch to respond.',
-                  'bad:Bouncing at the bottom — elastic rebound, not muscle work.',
-                  'bad:Locking out the knee hard at the top.'],
-        tempo:['3','1','1','1'], tempoLabels:['Down','Bottom','Up','Top']
-      },
-    ],
-    finisher: 'Core: Dead Bug 3×10 · Pallof Press 3×12 each side · McGill Curl-Up 3×10. No crunches, no sit-ups. Anti-flexion only. Then: Single-leg glute bridge 20 reps each — bodyweight, 2-sec holds.',
-    cooldown: '90/90 hip stretch 90 sec each · Pigeon pose 90 sec each · Hip flexor lunge 60 sec each · Seated hamstring stretch 60 sec each · Cat-cow 1 min · Child\'s pose 2 min.'
-  },
-
-  rest2: {
-    type: 'rest',
-    title: 'ACTIVE RECOVERY',
-  },
-};
-
-// ═══════════════════════════════════════════════
-// STATE
-// ═══════════════════════════════════════════════
-
-let currentDay = 0;
-let isDeload = false;
-let setsLoggedToday = 0;
-let sheetUrl = localStorage.getItem('sheetUrl') || '';
-let sessionData = {};
-
-function loadSessionData() {
-  try { sessionData = JSON.parse(localStorage.getItem('sessionData') || '{}'); } catch(e) { sessionData = {}; }
-}
-
-function saveSessionData() {
-  localStorage.setItem('sessionData', JSON.stringify(sessionData));
-}
-
-loadSessionData();
-
-// ═══════════════════════════════════════════════
-// INIT
-// ═══════════════════════════════════════════════
-
-function init() {
-  // Date
-  const now = new Date();
-  document.getElementById('current-date').textContent =
-    now.toLocaleDateString('en-US', { weekday:'short', month:'short', day:'numeric' }).toUpperCase();
-
-  // Load saved day
-  const saved = parseInt(localStorage.getItem('currentDay') || '0');
-  currentDay = Math.min(saved, 7);
-
-  // Load sheet url
-  if (sheetUrl) {
-    document.getElementById('sheets-link').style.display = 'inline-flex';
-    document.getElementById('sheets-link').href = sheetUrl;
-    document.getElementById('sheet-url-input').value = sheetUrl;
-  }
-
-  buildDaySelector();
-  renderWorkout();
-}
-
-function buildDaySelector() {
-  const sel = document.getElementById('day-selector');
-  sel.innerHTML = '';
-  CYCLE.forEach((day, i) => {
-    const btn = document.createElement('div');
-    btn.className = 'day-btn' + (day.isRest ? ' rest-btn' : '') + (i === currentDay ? ' active' : '');
-    btn.innerHTML = `<span class="day-btn-num">${i+1}</span><span class="day-btn-name">${day.label}</span>`;
-    btn.onclick = () => selectDay(i);
-    sel.appendChild(btn);
-  });
-}
-
-function selectDay(i) {
-  currentDay = i;
-  localStorage.setItem('currentDay', i);
-  document.querySelectorAll('.day-btn').forEach((b,idx) => {
-    b.classList.toggle('active', idx === i);
-  });
-  renderWorkout();
-}
-
-// ═══════════════════════════════════════════════
-// RENDER
-// ═══════════════════════════════════════════════
-
-function renderWorkout() {
-  const area = document.getElementById('workout-area');
-  const dayId = CYCLE[currentDay].id;
-  const workout = WORKOUTS[dayId];
-
-  if (!workout) { area.innerHTML = ''; return; }
-
-  // Rest day (active recovery)
-  if (workout.type === 'rest') {
-    area.innerHTML = `
-      <div class="rest-day-block">
-        <div class="rest-day-num">REST</div>
-        <div class="rest-day-label">Active Recovery</div>
-        <p>Walk 20–30 min. Full morning mobility sequence. Protein at every meal. 3L water. Sleep 7–8 hours. Magnesium glycinate before bed.<br><br>Avoid training. Your body is building right now.</p>
-      </div>`;
-    return;
-  }
-
-  // Cardio day
-  if (workout.type === 'cardio') {
-    const machines = workout.machines.map(m => `
-      <div class="cardio-machine">
-        <div class="cm-icon">${m.icon}</div>
-        <div class="cm-name">${m.name}</div>
-        <div class="cm-protocol">${m.protocol}</div>
-      </div>`).join('');
-    area.innerHTML = `
-      <div class="cardio-block">
-        <div class="cardio-header">
-          <div class="workout-day-label">${CYCLE[currentDay].label} DAY ${currentDay+1}</div>
-          <div class="workout-title">${workout.title}</div>
-          <div class="workout-tags">${(workout.tags||[]).map(t=>`<span class="wtag ${t[1]}">${t[0]}</span>`).join('')}</div>
-        </div>
-        <div class="cardio-grid">${machines}</div>
-        <div style="padding:16px 20px; border-top:1px solid var(--border);">
-          <div class="cooldown-title" style="margin-bottom:6px">PROTOCOL NOTE</div>
-          <p style="font-size:13px;color:var(--text2);line-height:1.7;">${workout.note}</p>
-        </div>
-      </div>`;
-    return;
-  }
-
-  // Workout day
-  const deloadNote = isDeload ? `<div style="background:var(--warn-dim);border:1px solid rgba(255,77,26,0.3);border-radius:5px;padding:10px 14px;margin-bottom:16px;font-family:var(--mono);font-size:10px;color:var(--warn);letter-spacing:1px;text-transform:uppercase;">⚠ DELOAD ACTIVE — Targets reduced to 60% · Extended rest · No finisher</div>` : '';
-
-  const warmupHtml = buildWarmup();
-  const exHtml = workout.exercises.map(ex => buildExercise(ex, dayId)).join('');
-  const finisherHtml = !isDeload ? `
-    <div class="finisher-card">
-      <div class="finisher-title">🔥 CONDITIONING FINISHER</div>
-      <p>${workout.finisher}</p>
-    </div>` : '';
-  const cooldownHtml = `
-    <div class="cooldown-card">
-      <div class="cooldown-title">🧘 COOLDOWN & STRETCH</div>
-      <p>${workout.cooldown}</p>
-    </div>`;
-
-  area.innerHTML = `
-    <div class="workout-header">
-      <div>
-        <div class="workout-day-label">${CYCLE[currentDay].label} · DAY ${currentDay+1}</div>
-        <div class="workout-title">${workout.title}</div>
-        <div class="workout-tags">${workout.tags.map(t=>`<span class="wtag ${t[1]}">${t[0]}</span>`).join('')}</div>
-      </div>
-      <div class="workout-meta-right">
-        <div class="time-budget-label">TIME BUDGET</div>
-        <select class="time-select" onchange="updateTimeBudget(this.value)">
-          <option>45 min</option>
-          <option selected>65 min</option>
-          <option>75 min</option>
-        </select>
+<!-- TAB: DASHBOARD -->
+<div id="tab-dash" style="display:none">
+  <div id="intel-dash"></div>
+  <div class="dg">
+    <div class="sc ac">
+      <div class="sl">Bodyweight</div>
+      <div class="sv2" id="bw-disp">—</div>
+      <div class="ssub" id="bw-trend">No data yet</div>
+      <div class="bw-row">
+        <input class="bw-i si" type="number" id="bw-inp" placeholder="183" step="0.1" inputmode="decimal"/>
+        <button class="bw-s" onclick="saveBW()">LOG LB</button>
       </div>
     </div>
-    ${deloadNote}
-    ${warmupHtml}
-    <div class="section-label">Exercises</div>
-    ${exHtml}
-    ${finisherHtml}
-    ${cooldownHtml}`;
+    <div class="sc">
+      <div class="sl">Goal</div>
+      <div class="sv2 bl" style="font-size:16px;line-height:1.3">RECOMP</div>
+      <div class="ssub">Lose fat · Build muscle</div>
+      <div class="ssub" style="margin-top:3px">Target: <strong style="color:var(--text)">175 lb</strong></div>
+    </div>
+    <div class="sc full">
+      <div class="sl">Bodyweight Trend — Last 8 Entries</div>
+      <div class="trend-c" id="bw-chart"></div>
+      <div style="font-family:var(--mono);font-size:8px;color:var(--muted);margin-top:5px;letter-spacing:1px">LOWER = PROGRESS · GREEN = DOWN FROM PREV</div>
+    </div>
+    <div class="sc"><div class="sl">Sets Logged</div><div class="sv2 gr" id="t-sets">0</div><div class="ssub">All time</div></div>
+    <div class="sc"><div class="sl">Sessions</div><div class="sv2 go" id="t-sess">0</div><div class="ssub">Completed</div></div>
+  </div>
+  <hr class="dv">
+  <div class="mg-lbl">Daily Macro Targets — Recomp</div>
+  <div class="sc full" style="margin-bottom:10px">
+    <div class="sl">183 lb · 5'8" · 35 · Recomp · WFH · 6am Training</div>
+    <div class="macro-r">
+      <div class="mi"><div class="mn" style="color:var(--accent)">180g</div><div class="mu">Protein</div></div>
+      <div class="mi"><div class="mn" style="color:var(--accent2)">160g</div><div class="mu">Carbs</div></div>
+      <div class="mi"><div class="mn" style="color:var(--gold)">60g</div><div class="mu">Fat</div></div>
+      <div class="mi"><div class="mn" style="color:var(--green)">1,880</div><div class="mu">Calories</div></div>
+    </div>
+    <hr class="dv" style="margin:10px 0">
+    <div style="font-size:11.5px;color:var(--text2);line-height:1.75">
+      <strong style="color:var(--text)">Protein:</strong> 1g per lb. Non-negotiable for recomp. Whey post-workout. Eggs, chicken, fish, Greek yogurt throughout the day.<br>
+      <strong style="color:var(--text)">Carbs:</strong> Before and after training only. Oats, rice, fruit. Protein + fat the rest of the day.<br>
+      <strong style="color:var(--text)">Recomp rule:</strong> Slight deficit on rest days. At maintenance on hard training days. Your protein-heavy approach is already correct — keep it.
+    </div>
+  </div>
+  <hr class="dv">
+  <div class="mg-lbl">Strength Progress</div>
+  <div id="prog-area"><div style="font-family:var(--mono);font-size:9px;color:var(--muted);letter-spacing:1px;padding:14px 0;text-align:center">LOG 2+ SESSIONS PER EXERCISE TO SEE PROGRESS</div></div>
+</div>
+
+<!-- TAB: SUPPS -->
+<div id="tab-supps" style="display:none">
+  <div class="intel blue" style="margin-bottom:12px">
+    <div class="intel-t">Stack Analysis</div>
+    <div class="intel-m">Solid recomp stack. <strong>Timing is everything</strong> — same supplements at wrong times lose 30–50% effectiveness. Follow this protocol exactly every day.</div>
+  </div>
+  <div class="sb">
+    <div class="sb-hdr"><div class="sb-icon">🌅</div><div><div class="sb-name">Wake Up — Empty Stomach</div><div style="font-family:var(--mono);font-size:8px;color:var(--muted);letter-spacing:1px;margin-top:2px">~5:45 AM · Before anything else</div></div><div class="sb-tag wtag wn">FIRST</div></div>
+    <div class="sb-list">
+      <div class="si2"><div class="sdot" style="background:var(--gold)"></div><div><div class="si2-name">Shilajit Resin</div><div class="si2-why">Fulvic acid absorption requires empty stomach. Testosterone support, energy, mitochondrial function.</div><div class="si2-dose">Pea-sized · Warm water · Hold 30s before swallowing</div></div></div>
+      <div class="si2"><div class="sdot" style="background:var(--accent)"></div><div><div class="si2-name">Vitamin B12 (Sublingual)</div><div class="si2-why">Absorbs directly into bloodstream before food. Morning energy, nerve function. Hold under tongue 60–90 seconds.</div><div class="si2-dose">1000mcg · Under tongue · 60–90 sec hold</div></div></div>
+    </div>
+  </div>
+  <div class="sb">
+    <div class="sb-hdr"><div class="sb-icon">⚡</div><div><div class="sb-name">Pre-Workout</div><div style="font-family:var(--mono);font-size:8px;color:var(--muted);letter-spacing:1px;margin-top:2px">30–40 min before training · ~6:15 AM</div></div><div class="sb-tag wtag ac">CRITICAL</div></div>
+    <div class="sb-list">
+      <div class="si2"><div class="sdot" style="background:var(--accent)"></div><div><div class="si2-name">Collagen Peptides (20g) + Vitamin C (500mg)</div><div class="si2-why"><strong>Must be taken together.</strong> Collagen synthesis peaks pre-exercise. Vitamin C is a required cofactor — without it effectiveness drops ~50%. Directly feeds L2-S1 disc, shoulder connective tissue, and tendons during training.</div><div class="si2-dose">20g collagen + 500mg Vitamin C · Mix in water or OJ</div></div></div>
+      <div class="si2"><div class="sdot" style="background:var(--accent2)"></div><div><div class="si2-name">L-Citrulline (6g)</div><div class="si2-why">Peaks in blood ~45 min after ingestion. Nitric oxide → blood flow, pump, performance. At 6am blood pressure naturally elevated — citrulline normalizes this during training.</div><div class="si2-dose">6g · Mix into water</div></div></div>
+      <div class="si2"><div class="sdot" style="background:var(--green)"></div><div><div class="si2-name">Creatine Monohydrate (5g)</div><div class="si2-why">Consistency over timing. Saturates muscle cells over weeks — critical for strength gains during recomp. Never skip.</div><div class="si2-dose">5g daily · Never skip</div></div></div>
+    </div>
+  </div>
+  <div class="sb">
+    <div class="sb-hdr"><div class="sb-icon">🍳</div><div><div class="sb-name">With Breakfast</div><div style="font-family:var(--mono);font-size:8px;color:var(--muted);letter-spacing:1px;margin-top:2px">Post-workout meal · Fat-soluble vitamins need food</div></div><div class="sb-tag wtag bl">FAT-SOLUBLE</div></div>
+    <div class="sb-list">
+      <div class="si2"><div class="sdot" style="background:var(--gold)"></div><div><div class="si2-name">Vitamin D3 + K2</div><div class="si2-why">Fat-soluble — take with fatty food. K2 directs calcium into bones not arteries. WFH = low sunlight = D3 deficiency common at 35. Suppresses testosterone when low.</div><div class="si2-dose">4,000 IU D3 + 100mcg K2 · With fatty food</div></div></div>
+      <div class="si2"><div class="sdot" style="background:var(--accent2)"></div><div><div class="si2-name">Omega-3 Fish Oil</div><div class="si2-why">Take with fattiest meal. Reduces systemic inflammation — directly relevant to L2-S1 disc and shoulder impingement. Drives insulin sensitivity for recomp.</div><div class="si2-dose">2–3g EPA+DHA · With biggest meal</div></div></div>
+    </div>
+  </div>
+  <div class="sb">
+    <div class="sb-hdr"><div class="sb-icon">🥤</div><div><div class="sb-name">Post-Workout (Within 30 min)</div></div><div class="sb-tag wtag gr">MPS</div></div>
+    <div class="sb-list">
+      <div class="si2"><div class="sdot" style="background:var(--green)"></div><div><div class="si2-name">Whey Isolate (25g)</div><div class="si2-why">Fast-digesting protein to spike muscle protein synthesis post-training. Isolate absorbed fastest. Critical 30-min window.</div><div class="si2-dose">25g · Water · Within 30 min of finishing</div></div></div>
+    </div>
+  </div>
+  <div class="sb">
+    <div class="sb-hdr"><div class="sb-icon">🌙</div><div><div class="sb-name">Before Bed</div><div style="font-family:var(--mono);font-size:8px;color:var(--muted);letter-spacing:1px;margin-top:2px">30 min before sleep · Most important timing</div></div><div class="sb-tag wtag" style="background:rgba(139,92,246,0.1);border-color:rgba(139,92,246,0.2);color:var(--purple)">RECOVERY</div></div>
+    <div class="sb-list">
+      <div class="si2"><div class="sdot" style="background:var(--purple)"></div><div><div class="si2-name">Magnesium Glycinate (300–400mg)</div><div class="si2-why">Most important timing in the stack. Deep sleep, muscle relaxation, nervous system recovery. Reduces tension around L2-S1 overnight. Toddler disrupts sleep — magnesium maximizes recovery from whatever you get.</div><div class="si2-dose">300–400mg elemental Mg · Every night</div></div></div>
+    </div>
+  </div>
+  <div class="enh">
+    <div class="enh-ttl">⬆ Stack Enhancements</div>
+    <div class="enh-i"><div class="sdot" style="background:var(--gold);flex-shrink:0;margin-top:5px"></div><div><div style="font-size:12px;font-weight:500;margin-bottom:2px">Vitamin C (500mg) — With collagen pre-workout</div><div style="font-size:10.5px;color:var(--text2);line-height:1.5">Required cofactor for collagen synthesis. Already in pre-workout block above. Do not skip — makes the collagen actually work.</div></div></div>
+    <div class="enh-i"><div class="sdot" style="background:var(--accent2);flex-shrink:0;margin-top:5px"></div><div><div style="font-size:12px;font-weight:500;margin-bottom:2px">Zinc (15–25mg) — Before bed with Magnesium</div><div style="font-size:10.5px;color:var(--text2);line-height:1.5">Testosterone support at 35. Toddler + WFH depletes zinc fast. Zinc + Magnesium before bed is one of the most effective natural testosterone protocols.</div></div></div>
+    <div class="enh-i"><div class="sdot" style="background:var(--green);flex-shrink:0;margin-top:5px"></div><div><div style="font-size:12px;font-weight:500;margin-bottom:2px">Ashwagandha KSM-66 (600mg) — Before bed</div><div style="font-size:10.5px;color:var(--text2);line-height:1.5">Chronically elevated cortisol at 35 with WFH + toddler blocks recomp by storing fat. KSM-66 only — clinically validated. 10–15% testosterone increase and significant cortisol reduction over 8 weeks.</div></div></div>
+  </div>
+</div>
+
+</div>
+
+<!-- STATUS -->
+<div class="status">
+  <div class="sti"><div class="std gr"></div><span class="stv" id="st-txt">Ready</span></div>
+  <div class="sti">SETS: <span class="stv" id="st-sets">0</span></div>
+  <div class="sti" id="st-dl" style="display:none"><div class="std wn"></div><span style="color:var(--warn)">DELOAD</span></div>
+</div>
+<div class="toast" id="toast">Saved ✓</div>
+
+<script>
+// ═══════════════════════════════════════════
+// DAYS
+// ═══════════════════════════════════════════
+const DAYS=[
+  {id:'push_a', label:'PUSH A', sub:'Barbell'},
+  {id:'pull_a', label:'PULL A', sub:'Width'},
+  {id:'legs_a', label:'LEGS A', sub:'Glute·Quad'},
+  {id:'sha',    label:'SH+ARM', sub:'Delts·Arms'},
+  {id:'rest_a', label:'REST',   sub:'Mobility', isRest:true},
+  {id:'push_b', label:'PUSH B', sub:'DB Day'},
+  {id:'pull_b', label:'PULL B', sub:'Thickness'},
+  {id:'legs_b', label:'LEGS B', sub:'Strength'},
+  {id:'rest_b', label:'REST',   sub:'Mobility', isRest:true},
+];
+
+// ═══════════════════════════════════════════
+// WARMUP
+// ═══════════════════════════════════════════
+const WU=[
+  {n:'01',name:'Elliptical',t:'5 min',d:'Full stride. Moderate resistance. Every session.'},
+  {n:'02',name:'Cat-Cow',t:'90 sec',d:'Exhale round, inhale arch. 4 sec each. Slow.'},
+  {n:'03',name:'90/90 Hip Stretch',t:'60s ea',d:'Breathe into tight hip. Desk tightness lives here.'},
+  {n:'04',name:'Shoulder CARs',t:'5 ea',d:'Full controlled articular rotation. Impingement prevention.'},
+  {n:'05',name:'Glute Bridge',t:'2×12',d:'3-sec hold at top. Wake up glutes before loading.'},
+  {n:'06',name:'Dead Bug',t:'2×8',d:'Lower back flat to floor. Core-spine connection reset.'},
+];
+
+// ═══════════════════════════════════════════
+// EXERCISE FACTORY
+// ═══════════════════════════════════════════
+function ex(id,name,muscle,type,target,rest,spine,shldr,why,setup,exec,breath,mistakes,tempo,tl){
+  return{id,name,muscle,type,target,rest,spine,shldr,why,setup,exec,breath,mistakes,tempo:tempo||['—','—','—','—'],tl:tl||['—','—','—','—']};
 }
 
-function buildWarmup() {
-  const items = WARMUP.map(w => `
-    <div class="wmob-card">
-      <div class="wmob-num">${w.num}</div>
-      <div class="wmob-name">${w.name}</div>
-      <div class="wmob-time">${w.time}</div>
-      <div class="wmob-detail">${w.detail}</div>
-    </div>`).join('');
-  return `
-    <div class="warmup-block" id="warmup-block">
-      <div class="warmup-header" onclick="toggleWarmup()">
-        <div class="warmup-title">🔄 WARMUP PROTOCOL <span style="font-size:10px;color:var(--muted)">(Elliptical + Mobility · ~17 min)</span></div>
-        <div class="warmup-chevron" id="warmup-chev">▼</div>
-      </div>
-      <div class="warmup-body">
-        <div class="warmup-grid">${items}</div>
-      </div>
-    </div>`;
+// ═══════════════════════════════════════════
+// WORKOUTS
+// ═══════════════════════════════════════════
+const W={
+
+push_a:{
+  title:'PUSH A — BARBELL DAY',
+  sub:'Chest · Shoulders · Triceps',
+  tags:[['Barbell Chest','ac'],['45–55 min',''],['Shoulder Safe','bl']],
+  injury:'Elbows at 60° on ALL pressing — never 90°. No pec deck machine ever. Cable fly only. If shoulder aches during warmup reduce pressing load by 20% today.',
+  groups:[
+    {label:'CHEST', cls:'chest', exs:[
+      ex('pa-ibp','Incline Barbell Bench Press','Upper chest · Anterior delt · Tricep','compound','4 × 6–8',90,false,true,
+        'Incline angle develops the upper chest that creates the lifted, flat look you want. Barbell allows heavier loading for strength and size.',
+        ['Set bench to 30–45°. Grip just outside shoulder width.','Plant feet flat on floor. Arch upper back — not lower back.','k:Elbows at 60° from torso. Never 90°. This protects your shoulder.'],
+        ['Unrack and lower to upper chest under full control.','k:Touch chest lightly — no bouncing. Press explosively back up.','6–8 hard reps. Last 2 should be a genuine effort.'],
+        ['k:Inhale and brace on the way down. Exhale explosively on the press.'],
+        ['x:Elbows flaring to 90° — impingement risk.','x:Bouncing off chest — ego, not muscle.','x:Lower back arching off bench — ribs stay down.'],
+        ['3','1','1','0'],['Down','Pause','Up','Top']),
+      ex('pa-cfly','Cable Fly','Mid and lower chest · Pec detail — constant tension','isolation','3 × 10–12',60,false,false,
+        'Cable maintains tension at both the stretch and contraction — DB fly drops to zero at the top. This constant tension is what builds chest definition. Cable only — no pec deck (machine locks shoulder into impingement position).',
+        ['Cables at chest height or slightly above. Slight forward lean.','k:Soft elbow bend locked in before rep 1. Never changes.'],
+        ['k:Hug a barrel — arc the arms, do not pull. Full pec stretch at the back.','Squeeze and pause 1 second at center. 3-second return.'],
+        ['Inhale opening. Exhale and brace closing. Hold the squeeze on the exhale.'],
+        ['x:Too much elbow bend — becomes a press.','x:Not opening fully — skips the stretch stimulus.','x:Pec deck machine — never.'],
+        ['3','1','1','1'],['Open','Stretch','Close','Squeeze']),
+      ex('pa-idbp2','Flat DB Press','Mid chest — full pec development','compound','3 × 8–10',75,false,true,
+        'Flat angle hits the sternal pec fibers that incline misses. DBs allow each arm its natural arc — safer than barbell for the shoulder.',
+        ['Flat bench. DBs at chest level. Same 60° elbow rule.','Scapulae retracted and depressed into the bench.'],
+        ['Full ROM. Touch chest lightly. Press up and in.','k:DBs travel toward each other at the top. Full lockout.'],
+        ['Inhale brace down. Exhale and press.'],
+        ['x:Elbows flaring — same rule as barbell.','x:Uncontrolled descent — the eccentric matters.'],
+        ['3','1','1','0'],['Down','Pause','Up','Top']),
+    ]},
+    {label:'SHOULDERS', cls:'shoulder', exs:[
+      ex('pa-sdbsp','Seated DB Shoulder Press','All 3 delt heads · Tricep','compound','4 × 6–8',90,true,true,
+        'Primary overhead strength builder. Seated protects L2-S1. DBs allow natural shoulder arc unlike barbell.',
+        ['Seat at 90°. Core braced before every single rep.','k:Elbows slightly FORWARD of shoulder plane — not directly out to sides.'],
+        ['k:Press to just short of lockout. Keep deltoid tension throughout.','Re-brace core between every rep.'],
+        ['k:Inhale and brace before every press. Exhale pushing up. Every rep.'],
+        ['x:Lower back arching — reduce the load.','x:Elbows directly out — rotate slightly forward.'],
+        ['2','0','2','0'],['Down','—','Up','—']),
+      ex('pa-dlr','DB Lateral Raise','Medial deltoid — the round shoulder muscle','isolation','3 × 10–12',45,false,false,
+        'Medial delt creates the round, capped shoulder from the front. Cannot be built by pressing alone. This is the primary driver of shoulder width.',
+        ['Slight forward lean 15°. Go light — form collapses at heavy weights.','k:Pinky slightly higher than thumb throughout.'],
+        ['k:Lead with elbow — not hand. Think "show your armpit."','Raise to shoulder height only. 3-sec lower. 1-sec pause at top.'],
+        ['Exhale on raise. Inhale on the 3-second lower.'],
+        ['x:Shrugging traps — defeats the exercise.','x:Raising above shoulder — traps take over.','x:Momentum to get the weight up.'],
+        ['3','1','1','0'],['Down','Top','Up','—']),
+    ]},
+    {label:'TRICEPS', cls:'tricep', exs:[
+      ex('pa-tpd','Rope Tricep Pushdown','All 3 tricep heads · Lateral head detail','isolation','3 × 10–12',60,false,false,
+        'Lateral head creates the horseshoe shape visible from the side. Rope with flare at the bottom hits it directly.',
+        ['High cable, rope. Upper arms pinned to ribs — non-negotiable.','k:Elbows directly under shoulders.'],
+        ['Push down and flare rope apart at the bottom.','k:Externally rotate wrists at full extension. Squeeze. Hold 1 sec.'],
+        ['Exhale and push. Inhale on return.'],
+        ['x:Upper arms drifting forward — stay pinned.','x:Not separating rope at bottom — half the stimulus gone.'],
+        ['—','—','—','—'],['—','—','—','—']),
+      ex('pa-ote','Overhead Tricep Extension (cable rope, seated)','Tricep long head — largest head, arm mass','isolation','3 × 10–12',60,true,false,
+        'Long head is the biggest tricep head. Training it in the overhead stretched position drives maximum growth. 2/3 of your arm is tricep — this builds the mass.',
+        ['Seated — L2-S1 protection. Rope overhead, upper arms vertical beside ears.','k:Upper arms are fixed pillars. Only forearms move.'],
+        ['k:Deep stretch behind head — that IS the growth stimulus.','Extend to near lockout. Squeeze 1 second. Lower slowly.'],
+        ['Exhale extending. Inhale slowly into the overhead stretch.'],
+        ['x:Elbows flaring wide — long head disengages.','x:Standing and arching lower back.'],
+        ['3','1','2','1'],['Down','Stretch','Up','Squeeze']),
+    ]},
+    {label:'FINISHER', cls:'finisher', exs:[
+      ex('pa-fin1','Face Pull superset → DB Shrug (2-sec hold)','Rear delt · Mid traps · External rotators','isolation','2 × 15 + 12',0,false,true,
+        'Face pull is non-negotiable for shoulder health — builds rear delt and external rotation. Shrug builds the trap thickness that frames the neck and shoulder.',
+        ['Face pull: rope at face height, light weight.','Shrug: DBs at sides, stand tall.'],
+        ['Face pull: elbows OUT and UP, wrists behind ears, hold 1 sec.','k:Shrug: straight UP, hold 2 seconds, no rolling. Lower slowly.'],
+        ['No rest between the two exercises.'],
+        ['x:Face pull too heavy — loses external rotation.','x:Rolling shoulders on shrug — useless and risky.'],
+        ['—','—','—','—'],['—','—','—','—']),
+    ]},
+    {label:'CONDITIONING', cls:'conditioning', exs:[
+      ex('pa-cond','Elliptical HIIT','Conditioning · Fat loss · Recomp','conditioning','8 rounds',0,false,false,
+        'Drives fat loss without muscle loss. HIIT post-lifting targets fat stores directly.',
+        ['Elliptical. Start at moderate resistance.'],
+        ['k:8 rounds of 30 seconds hard / 20 seconds easy. Total ~6–7 min.','Hard means 85%+ effort — can only say 2–3 words at a time.'],
+        ['Breathe hard on the work intervals. Recover on the rest.'],
+        ['x:Going too easy — this needs to be genuinely hard.'],
+        ['—','—','—','—'],['—','—','—','—']),
+    ]},
+    {label:'ABS', cls:'abs', exs:[
+      ex('pa-cc','Cable Crunch','Rectus abdominis — direct ab development','isolation','2 × 15',20,true,false,
+        'Safest weighted ab exercise for L2-S1. Constant tension. Kneeling controls lumbar flexion. This builds visible abs.',
+        ['Rope attachment high on cable. Kneel facing stack.','k:Hips fixed throughout — only spine flexes.'],
+        ['k:Crunch rib cage toward pelvis — not arms pulling. Hold 1 second.','Full contraction at bottom. Return to spine extension slowly.'],
+        ['Exhale and crunch. Squeeze abs. Inhale returning.'],
+        ['x:Pulling with arms — abs do the work.','x:Momentum — slow and controlled builds abs.'],
+        ['3','1','1','1'],['Down','Squeeze','Up','Extend']),
+      ex('pa-hkr','Hanging Knee Raise','Lower abs · Hip flexors — lower ab definition','isolation','2 × 12',20,true,false,
+        'Lower abs are the hardest to develop. Posterior pelvic tilt at the top activates lower abs vs just hip flexors.',
+        ['Dead hang from pull-up bar. Shoulders packed down.','k:Start with knees bent — safer for L2-S1 than straight legs.'],
+        ['k:Tuck pelvis UNDER as knees rise — posterior pelvic tilt. This is the key cue.','Raise until hips past 90°. Hold 1 sec. Lower with control.'],
+        ['Exhale as knees rise. Inhale lowering.'],
+        ['x:No pelvic tilt — becomes a hip flexor exercise.','x:Swinging — kills the tension.'],
+        ['3','1','1','1'],['Down','—','Up','Hold']),
+    ]},
+  ],
+  cooldown:'Doorway chest stretch 60s each · Cross-body shoulder 45s each · Overhead tricep stretch 45s each · Shoulder CARs 5 each · Child\'s pose 90s.',
+},
+
+pull_a:{
+  title:'PULL A — WIDTH DAY',
+  sub:'Back Width · Biceps · Traps',
+  tags:[['V-Taper Focus','ac'],['45–55 min',''],['Face Pull Mandatory','bl']],
+  injury:'Face pull is mandatory today — not optional. Shoulder health depends on external rotation work on every pull session.',
+  groups:[
+    {label:'BACK', cls:'back', exs:[
+      ex('pla-wlpd','Wide Lat Pulldown','Lats — back width and V-taper','compound','4 × 6–8',90,false,true,
+        'Wide lat pulldown directly builds lat width — the muscle that creates the V-taper. Heavy with full ROM.',
+        ['Wide overhand grip just outside shoulder width. Lean back 10–15°.','k:Depress scapulae before every pull — shoulder blades into back pockets.'],
+        ['k:"Elbows to hip pockets" — not pull the bar down. Bar to upper chest.','Full arm extension at top — full lat stretch before every rep. 3-sec ascent.'],
+        ['Exhale and brace on the pull. Inhale slowly back to full extension.'],
+        ['x:Not fully extending at top — cuts lat stretch in half.','x:Biceps leading — lats and scapulae start every rep.'],
+        ['3','0','2','1'],['Up','Top','Down','Chest']),
+      ex('pla-ulpd','Underhand Lat Pulldown','Lower lat sweep — V-taper bottom line','compound','3 × 8–10',75,false,false,
+        'Supinated grip recruits lower lats creating the bottom sweep of the V-taper. Different lat fibers than wide pulldown.',
+        ['Supinated grip, shoulder-width. Same lean.','k:"Elbows to hip pockets" — supinated grip makes this natural.'],
+        ['Bar to upper chest. Full extension at top. 3-sec controlled ascent.'],
+        ['Exhale on pull. Inhale all the way back to full extension.'],
+        ['x:Not extending fully at top.','x:Biceps leading — scapulae first.'],
+        ['3','0','2','1'],['Up','Top','Down','Chest']),
+      ex('pla-csdr','Chest-Supported DB Row','Upper back · Rhomboids · Rear delt — zero spinal load','compound','3 × 8–10',75,true,false,
+        'Best row for L2-S1 — bench eliminates ALL spinal erector loading. Builds upper back thickness and rear delt for round shoulder appearance from behind.',
+        ['Face down on 45° incline bench. Chest supported.','k:Bench eliminates all spinal loading entirely.'],
+        ['k:Row elbows HIGH and WIDE — toward ceiling. Upper back + rear delt.','Squeeze scapulae hard. Hold 1 second. Full hang at bottom.'],
+        ['Exhale rowing up. Inhale lowering to full hang.'],
+        ['x:Chest lifting off bench — defeats the purpose.','x:Elbows toward hips — that is lat row, not upper back.'],
+        ['3','1','2','1'],['Down','Bottom','Up','Squeeze']),
+    ]},
+    {label:'BICEPS', cls:'bicep', exs:[
+      ex('pla-idbc','Incline DB Curl','Bicep long head — peak development','isolation','3 × 10–12',60,false,false,
+        'Incline angle stretches the bicep long head — the primary driver of bicep peak. The stretch IS the exercise.',
+        ['Bench 45–60°. Arms hang fully behind torso plane.','k:This stretch is why this exercise exists. Go light enough to achieve full hang.'],
+        ['Supinate wrist throughout. Pause 1 sec at peak.','k:Lower to full hang every rep — most valuable part.'],
+        ['Exhale and curl. Inhale all the way back to full hang.'],
+        ['x:Elbows swinging forward — arms stay behind torso plane.','x:Not lowering fully — loses entire stretch benefit.'],
+        ['3','1','2','1'],['Down','Stretch','Curl','Peak']),
+      ex('pla-pc','Preacher Curl (EZ bar or machine)','Bicep short head — peak and definition','isolation','3 × 10–12',60,false,false,
+        'Preacher pad fixes upper arms — zero cheat possible. Even moderate weight is brutally effective.',
+        ['Upper arms flat on pad — they cannot move.','k:Moderate weight is devastating here.'],
+        ['Curl to near full contraction. Lower fully and slowly — high elbow risk if dropped.','k:Supinate at top. Squeeze and hold 1 second.'],
+        ['Exhale curl. Inhale slowly to full extension.'],
+        ['x:Elbows lifting off pad — exercise over.','x:Dropping weight fast at bottom — elbow injury.'],
+        ['3','1','2','1'],['Down','—','Curl','Squeeze']),
+      ex('pla-hc','Hammer Curl','Brachialis · Brachioradialis — arm thickness and density','isolation','2 × 12',45,false,false,
+        'Brachialis sits beneath the bicep and pushes it up when developed. Creates arm thickness alongside the bicep peak.',
+        ['Neutral grip (thumbs up). Elbows pinned to ribs.','k:Do NOT supinate at any point.'],
+        ['3-second eccentric. That is where brachialis growth lives.'],
+        ['Exhale curl. Inhale through the 3-second lower.'],
+        ['x:Supinating midway — defeats the purpose.','x:Elbows swinging forward.'],
+        ['3','0','1','0'],['Down','—','Up','—']),
+    ]},
+    {label:'TRAPS', cls:'traps', exs:[
+      ex('pla-shrug','DB Shrug (2-sec hold)','Upper traps — thickness from neck to shoulder','isolation','3 × 10–12',60,false,false,
+        'Upper traps give the thick, powerful look from neck to shoulder. Without dedicated trap work the upper back looks underdeveloped regardless of rows.',
+        ['DBs at sides. Stand tall.','k:Straight UP and DOWN only. No rolling — ever.'],
+        ['Shrug as high as possible. Hold 2 full seconds at top.','k:No rolling. Pure elevation. Lower slowly — full stretch at bottom.'],
+        ['Exhale shrugging up. Hold. Inhale lowering.'],
+        ['x:Rolling shoulders — useless and risks rotator cuff.','x:No hold at top — momentum does the work.'],
+        ['2','2','2','0'],['Up','Hold','Down','—']),
+    ]},
+    {label:'FINISHER', cls:'finisher', exs:[
+      ex('pla-fin','Face Pull → Cable Upright Row (wide grip)','Rear delt · Mid traps · External rotators','isolation','2 × 15 + 12',0,false,true,
+        'Face pull is mandatory for shoulder health. Wide-grip upright row hits mid traps and rear delt — wider grip keeps elbows below shoulder height and prevents impingement.',
+        ['Face pull: rope at face height, light weight.','Upright row: wide grip — hands wider than shoulders. Elbows stay BELOW shoulder height.'],
+        ['Face pull: elbows OUT and UP, wrists behind ears, hold 1 sec.','k:Upright row: wide grip only. Elbows go OUT not up. Stop below shoulder height.'],
+        ['No rest between exercises.'],
+        ['x:Narrow grip upright row — impingement.','x:Elbows above shoulder height — same risk.'],
+        ['—','—','—','—'],['—','—','—','—']),
+    ]},
+    {label:'CONDITIONING', cls:'conditioning', exs:[
+      ex('pla-cond','Rowing Ergometer','Conditioning · Fat loss · Full posterior chain','conditioning','4 × 500m',90,true,false,
+        'Rowing hits the posterior chain (back, glutes, hamstrings) while driving cardiovascular conditioning. Legs-drive-finish sequence.',
+        ['Set damper to 5–6. Strap feet in.','k:Legs drive first — then lean back — then arms pull. That sequence every stroke.'],
+        ['k:4 × 500m at 85% effort. Rest 90 seconds between. Total ~8 min.','Keep strokes per minute 22–26.'],
+        ['Breathe rhythmically with each stroke.'],
+        ['x:Arms pulling before legs finish — backwards and weak.','x:Hunching over the handle — sit tall throughout.'],
+        ['—','—','—','—'],['—','—','—','—']),
+    ]},
+    {label:'ABS', cls:'abs', exs:[
+      ex('pla-pall','Pallof Press','Obliques · Core — anti-rotation, slim waist','isolation','2 × 12 ea',20,true,false,
+        'Anti-rotation oblique training creates the defined, tapered waist. Safest oblique training for L2-S1.',
+        ['Cable at chest height. Stand perpendicular to cable.','k:Brace core before every rep like you are about to be punched.'],
+        ['Press straight out from chest. Hold 2 seconds. Return slowly.','k:The cable tries to rotate you. Resist that. That resistance IS the exercise.'],
+        ['Exhale pressing out. Hold brace during 2-second hold.'],
+        ['x:Rotating toward cable — you are not resisting.','x:Not bracing before pressing.'],
+        ['1','2','2','0'],['Out','Hold','In','—']),
+      ex('pla-dbu','Dead Bug','TVA · Deep core — L2-S1 stabilization','isolation','2 × 10 ea',20,true,false,
+        'Dead bug trains the TVA — the primary protective muscle for your L2-S1 disc. Building this reduces disc loading on every exercise you do.',
+        ['Lie on back. Arms toward ceiling. Knees bent 90° raised.','k:Lower back PRESSED flat to floor throughout. If it lifts — reduce range.'],
+        ['Extend opposite arm and leg toward floor. Keep lower back flat.','k:Only go as far as lower back stays flat. Return and switch.'],
+        ['Exhale extending. Inhale returning. Breathing creates the brace.'],
+        ['x:Lower back lifting — reduce range of motion.','x:Moving too fast — slow is the point.'],
+        ['4','1','4','0'],['Extend','Hold','Return','—']),
+    ]},
+  ],
+  cooldown:'Lat hang from bar 45s · Doorway bicep stretch 60s each arm · Child\'s pose 90s · Thread the needle 45s each.',
+},
+
+legs_a:{
+  title:'LEGS A — GLUTE & QUAD',
+  sub:'Glute · Quad · Hamstring · Calf',
+  tags:[['L2-S1 Adapted','wn'],['45–55 min',''],['Glute Priority','gr']],
+  injury:'L2-S1: no barbell squats, no heavy RDLs. Core brace before every single rep of every exercise. If lower back twinges on any movement — stop and scale back immediately.',
+  groups:[
+    {label:'GLUTE', cls:'glute', exs:[
+      ex('la-cpt','Cable Pull-Through','Glutes · Hamstrings — hip hinge primer','compound','3 × 15',60,true,false,
+        'Opens every leg session. Cable pulls backward not downward — dramatically less spinal compression than any deadlift. Primes posterior chain.',
+        ['Low cable, rope. Facing away. Feet straddle cable.','k:Cable direction is what makes this L2-S1 safe.'],
+        ['Hinge hips BACK — spine neutral. Arms just hold rope.','k:Drive hips forward explosively. Squeeze glutes hard at top. No hyperextension.'],
+        ['Inhale and brace on hinge. Exhale forcefully on hip drive.'],
+        ['x:Squatting not hinging — hips go BACK, not down.','x:Rounding lower back on hinge.'],
+        ['—','—','—','—'],['—','—','—','—']),
+      ex('la-ht','Hip Thrust (barbell or machine)','Glutes — most effective glute exercise','compound','4 × 8–10',90,true,false,
+        'Most effective glute exercise. Zero spinal compression. Builds the defined glute that creates a lean athletic lower body.',
+        ['Upper back at mid-scapula on bench. Feet flat, shoulder-width.','k:Chin tucked throughout — prevents lower back hyperextension at top.'],
+        ['Drive through heels. Straight line shoulder to knee.','k:Posterior pelvic tilt at top — tuck pelvis under. Maximizes glute AND protects L2-S1.','2-second hold every rep. Heavy — last 2 genuinely hard.'],
+        ['Inhale and brace before each rep. Exhale driving up. Hold during squeeze.'],
+        ['x:Hyperextending at top — glute squeeze not back arch.','x:No 2-second pause — the isometric is the stimulus.','x:Chin not tucked.'],
+        ['2','2','1','0'],['Down','Squeeze','Up','Bottom']),
+    ]},
+    {label:'QUADS', cls:'quad', exs:[
+      ex('la-gs','Goblet Squat','Quads · Glutes — spine-safe depth','compound','4 × 8–10',75,true,false,
+        'Front-loaded counterweight allows upright torso at depth. Dramatically reduces lumbar stress vs barbell squat. Builds defined quads.',
+        ['DB or KB at chest. Feet shoulder-width, toes 30° out.','k:Front load counterbalances you — this is why it is L2-S1 safe.'],
+        ['Sit BETWEEN your legs. Knees track over toes.','k:Only as deep as back stays neutral. Stop before butt wink.'],
+        ['Inhale and brace before descent. Exhale explosively driving up.'],
+        ['x:Chest caving forward — too heavy.','x:Knees caving in.','x:Butt wink — L2-S1 at risk.'],
+        ['3','1','1','0'],['Down','Bottom','Up','Top']),
+      ex('la-bss','Bulgarian Split Squat (DB)','Quads · Glutes — unilateral strength','compound','3 × 8–10 ea',75,true,false,
+        'Unilateral work reduces spinal load while maximizing leg stimulus. Builds proportional, defined legs.',
+        ['Rear foot on bench. Front foot far enough for vertical shin.','k:Upright torso — forward lean removes glute, loads lower back.'],
+        ['Lower hips straight DOWN. Front knee over 2nd toe.','Drive through front heel exclusively.'],
+        ['Inhale and brace before lowering. Exhale driving back up.'],
+        ['x:Torso leaning forward — loads L2-S1.','x:Front foot too close — knee stress.'],
+        ['3','1','1','0'],['Down','Bottom','Up','Top']),
+    ]},
+    {label:'HAMSTRINGS', cls:'hamstring', exs:[
+      ex('la-lc','Seated Leg Curl','Hamstrings — definition and balance','isolation','3 × 10–12',60,true,false,
+        'Hamstring definition balances the look of the leg. Seated preferred — L2-S1 fully supported.',
+        ['Seated — back fully against seat. Thigh pad snug.','k:L2-S1 fully supported. Always seated version.'],
+        ['Full extension at start every rep.','k:3-second eccentric. Plantarflex foot at peak. Squeeze and hold 1 second.'],
+        ['Exhale curl. Inhale through full 3-second lowering.'],
+        ['x:Dropping weight fast — the eccentric IS the stimulus.','x:Not starting from full extension.'],
+        ['3','1','1','1'],['Down','—','Curl','Squeeze']),
+      ex('la-rdl','Light DB Romanian Deadlift','Hamstrings · Glutes — hip hinge pattern','isolation','3 × 12–15',60,true,false,
+        'Light DBs only — pattern not load. Fills the hamstring gap safely. Spine neutral throughout.',
+        ['Light DBs only. Feet hip-width. Micro-bend in knees — locked in.','k:Natural neutral spine throughout. Never rounded, never forced flat.'],
+        ['Push hips back — DBs slide down thighs, staying close.','k:Lower until strong hamstring stretch — mid-shin. Stop there. Drive hips forward to return.'],
+        ['Inhale and brace before each hinge. Exhale as hips drive forward.'],
+        ['x:Rounding lower back at bottom — highest risk for L2-S1.','x:Bending knees too much — turns into a squat.','x:Going heavy — pattern is everything here.'],
+        ['3','1','1','1'],['Down','Stretch','Up','Squeeze']),
+    ]},
+    {label:'CALVES', cls:'calf', exs:[
+      ex('la-cr','Single-Leg Calf Raise','Gastrocnemius · Soleus — defined lower leg','isolation','3 × 20 ea',45,false,false,
+        'Defined calves complete the lean leg look. Full ROM is what makes calves respond — not heavy partial reps.',
+        ['Ball of foot on edge. Single leg — doubles stimulus.'],
+        ['Rise to full plantar flexion. Pause 1 second at top.','k:3-second lowering to full stretch. Full ROM every rep.'],
+        ['Exhale rising. Inhale through the 3-second descent.'],
+        ['x:Short ROM — heel not dropping fully.','x:Bouncing at bottom — elastic rebound, not muscle.'],
+        ['3','1','1','1'],['Down','Bottom','Up','Top']),
+    ]},
+    {label:'ABS', cls:'abs', exs:[
+      ex('la-abw','Ab Wheel Rollout','Full core — anti-extension','isolation','2 × 10',20,true,false,
+        'Anti-extension core training prevents spine from extending under load. Builds the flat, defined midsection without spinal flexion loading.',
+        ['Kneel on mat. Ab wheel, both hands.','k:Start with SMALL range. If lower back dips at all — stop.'],
+        ['Roll forward keeping lower back flat. Roll back using core only.','k:Hips do not drop. Lower back stays neutral throughout.'],
+        ['Exhale rolling out. Inhale rolling back. Braced throughout.'],
+        ['x:Hips dropping — lower back under immediate load.','x:Going too far before building the strength.'],
+        ['3','1','3','0'],['Out','Hold','Back','—']),
+      ex('la-mcg','McGill Curl-Up','Rectus abdominis — spine-safe ab activation','isolation','2 × 10',20,true,false,
+        'Designed for disc issues by Dr. McGill. Activates abs without lumbar flexion under load.',
+        ['Lie on back. One knee bent, one leg straight.','k:Hands under lower back maintaining its natural curve — do not flatten it.'],
+        ['Only head and shoulders rise. Lumbar curve does NOT change.','k:Hold top 8–10 seconds. Lower with control. That is ONE rep.'],
+        ['Exhale and brace on the rise. Breathe normally during the hold.'],
+        ['x:Flattening lower back — becomes a crunch.','x:Pulling head with hands — hands are under the back.'],
+        ['2','8','2','0'],['Up','Hold','Down','—']),
+    ]},
+  ],
+  cooldown:'90/90 hip stretch 90s each · Pigeon pose 90s each · Hip flexor lunge 60s each · Seated hamstring stretch 60s each · Cat-cow 1 min.',
+},
+
+sha:{
+  title:'SHOULDERS + ARMS',
+  sub:'Round Delts · Big Arms · Trap Definition',
+  tags:[['Dedicated Volume','ac'],['45–55 min',''],['No Ego','wn']],
+  injury:'Face pulls open this day — before any other loading. This is the day impingement most often flares. Face pulls first, every time.',
+  groups:[
+    {label:'SHOULDER OPENER', cls:'shoulder', exs:[
+      ex('sha-fp','Face Pull — Day Opener','Rear delt · External rotators · Mid traps','isolation','3 × 15',45,false,true,
+        'Non-negotiable opener. Activates external rotators and rear delt before any shoulder loading. The rear delt makes shoulders look round from ALL angles.',
+        ['Rope at face height. Light weight — activation work.','k:If it looks like a horizontal row it is too heavy.'],
+        ['Elbows OUT and UP. End: upper arms parallel, wrists behind ears.','k:Squeeze rear delts hard. Hold 1 second. Feel it clearly.'],
+        ['Exhale pull and rotate. Inhale controlled return.'],
+        ['x:Too heavy — no external rotation benefit.','x:Skipping this opener — not optional.'],
+        ['—','—','—','—'],['—','—','—','—']),
+    ]},
+    {label:'SHOULDERS', cls:'shoulder', exs:[
+      ex('sha-ap','Arnold Press','All 3 delt heads — complete shoulder development','compound','4 × 8–10',75,true,true,
+        'Hits all three delt heads in one continuous arc. More complete shoulder development than any other single movement.',
+        ['Seated. DBs at shoulder height, palms facing YOU at start.','k:Core braced before every rep. Lighter than standard press — rotation needs control.'],
+        ['Press up while rotating continuously — palms face AWAY at top.','k:Smooth continuous arc. Not two movements. Fully reverse on descent.'],
+        ['Inhale and brace before each rep. Exhale pressing and rotating.'],
+        ['x:Too heavy — lose the rotation.','x:Arching lower back.','x:Two separate movements not one arc.'],
+        ['3','0','2','0'],['Down','—','Up','—']),
+      ex('sha-clr','Cable Lateral Raise (single arm)','Medial delt — maximum width and roundness','isolation','3 × 12–15 ea',45,false,false,
+        'Cable gives constant tension at the bottom where DBs give zero. Superior medial delt builder for the round shoulder width.',
+        ['Low cable. Stand sideways. Arm crosses body to grab — bottom tension.','k:Cross-body position is why cable beats DBs here.'],
+        ['Raise to shoulder height leading with elbow. Pinky higher than thumb.','k:3-second lowering. 1-second pause at top. Strict always.'],
+        ['Exhale on raise. Inhale on 3-second lower.'],
+        ['x:Leaning away from cable.','x:Raising above shoulder — traps take over.'],
+        ['3','1','1','0'],['Down','Top','Up','—']),
+      ex('sha-rdf','Rear Delt Cable Fly','Rear deltoid — round shoulders from behind','isolation','3 × 12–15',45,false,false,
+        'Rear delt makes shoulders look round and full from the back and side. Underdeveloped rear delts create the flat, narrow-from-behind look.',
+        ['Cables crossed at face height. Both cables in opposite hands.','k:Arms stay nearly straight — fly not a row.'],
+        ['Open arms wide. Squeeze rear delts hard at the back.','k:Pause 2 seconds at full open position. Feel the rear delt.'],
+        ['Exhale opening. Inhale closing.'],
+        ['x:Bending elbows too much — becomes a row.','x:Too heavy — arms bend and rear delt loses tension.'],
+        ['2','2','2','0'],['Open','Hold','Close','—']),
+    ]},
+    {label:'TRAPS', cls:'traps', exs:[
+      ex('sha-shrug','DB Shrug (2-sec hold)','Upper traps — power from neck to shoulder','isolation','3 × 10–12',60,false,false,
+        'Upper traps give the thick, defined look from neck to shoulder. Without this, the upper back looks underdeveloped regardless of rows.',
+        ['DBs at sides. Stand tall.','k:Straight UP and DOWN. No shoulder rolling — ever.'],
+        ['Shrug as high as possible. Hold 2 full seconds at top.','k:No rolling. Pure elevation. Full stretch at bottom.'],
+        ['Exhale shrugging up. Hold. Inhale lowering.'],
+        ['x:Rolling shoulders — useless and risks rotator cuff.','x:No hold — momentum does the work.'],
+        ['2','2','2','0'],['Up','Hold','Down','—']),
+    ]},
+    {label:'BICEPS', cls:'bicep', exs:[
+      ex('sha-pc2','Preacher Curl','Bicep — peak and definition','isolation','3 × 10–12',60,false,false,
+        'Upper arms fixed on pad — zero cheat. Short head peak development.',
+        ['Upper arms flat on pad — they cannot move.'],
+        ['Curl to near full contraction. Lower fully and slowly.','k:Supinate at top. Squeeze and hold 1 second.'],
+        ['Exhale curl. Inhale slowly to full extension.'],
+        ['x:Elbows lifting off pad.','x:Dropping weight fast — elbow injury.'],
+        ['3','1','2','1'],['Down','—','Curl','Squeeze']),
+      ex('sha-hc2','Hammer Curl','Brachialis — arm thickness','isolation','3 × 10–12',45,false,false,
+        'Brachialis under the bicep pushes the peak up. Creates arm density.',
+        ['Neutral grip. Elbows pinned to ribs.','k:No supination.'],
+        ['3-second eccentric every rep.'],
+        ['Exhale curl. Inhale through the 3-second lower.'],
+        ['x:Supinating — defeats purpose.','x:Elbows swinging.'],
+        ['3','0','1','0'],['Down','—','Up','—']),
+    ]},
+    {label:'TRICEPS', cls:'tricep', exs:[
+      ex('sha-sc','Skull Crusher (EZ bar)','Tricep long head · Mass builder','isolation','3 × 8–10',75,false,false,
+        'Heavy skull crushers build tricep long head mass. Paired with pushdown builds both mass and detail.',
+        ['Flat bench. EZ bar above upper chest, arms extended.','k:Upper arms angled slightly back toward head — reduces elbow stress.'],
+        ['Lower bar toward forehead by bending elbows only — upper arms stay still.','k:Stop just above forehead. Press back along same arc.'],
+        ['Inhale lowering. Exhale pressing back up.'],
+        ['x:Elbows flaring wide.','x:Upper arms moving — fixed pillars only.'],
+        ['3','1','2','1'],['Down','Forehead','Up','Squeeze']),
+      ex('sha-cgpu','Close-Grip Push-Up','Triceps · Inner chest — bodyweight finisher','isolation','2 × max',45,false,false,
+        'Perfect finisher — no loading, maximum tricep pump. Go to near-failure.',
+        ['Hands shoulder-width or slightly closer. Full plank.'],
+        ['Elbows graze ribs on descent. Full lockout at top.','k:Go to near-failure. Leave nothing.'],
+        ['Exhale pressing up. Inhale lowering.'],
+        ['x:Hips sagging — core collapses.'],
+        ['2','1','1','0'],['Down','Bottom','Up','—']),
+    ]},
+    {label:'ABS', cls:'abs', exs:[
+      ex('sha-cc2','Cable Crunch','Rectus abdominis — direct ab development','isolation','2 × 15',20,true,false,
+        'Constant cable tension. Kneeling controls lumbar flexion. Safest weighted ab exercise for L2-S1.',
+        ['Rope high on cable. Kneel facing stack. Hips fixed.'],
+        ['k:Crunch rib cage toward pelvis — not arms pulling. Hold 1 second.','Full contraction. Return to spine extension slowly.'],
+        ['Exhale and crunch. Squeeze abs. Inhale returning.'],
+        ['x:Pulling with arms.','x:Momentum.'],
+        ['3','1','1','1'],['Down','Squeeze','Up','Extend']),
+      ex('sha-vac','Vacuum Hold','TVA — deep ab compression, slim waist','isolation','2 × 30s',20,false,false,
+        'Trains the transverse abdominis — the corset muscle. Creates the slim, tight waist look. Consistent practice measurably reduces resting waist circumference.',
+        ['Stand, sit, or kneel. Exhale ALL air completely.','k:Pull belly button toward spine as hard as possible. Hold.'],
+        ['k:30 seconds maximum TVA contraction. Build to 60s over time.','Breathe nasally lightly if needed while maintaining contraction.'],
+        ['Exhale completely first. Then light nostril breaths only.'],
+        ['x:Not exhaling fully first — vacuum requires empty lungs.','x:Holding for 5 seconds — 30s minimum for adaptation.'],
+        ['—','—','—','—'],['—','—','—','—']),
+    ]},
+  ],
+  cooldown:'Shoulder CARs 5 each · Doorway shoulder stretch 60s each · Cross-body stretch 45s each · Overhead tricep stretch 45s each · Child\'s pose 90s.',
+},
+
+push_b:{
+  title:'PUSH B — DB DAY',
+  sub:'Chest Definition · Shoulder Volume · Tricep Detail',
+  tags:[['DB Chest','ac'],['45–55 min',''],['Chest Definition','gr']],
+  injury:'Same shoulder rules — elbows at 60° on all pressing. Cable fly only. No pec deck machine. If shoulder impingement during warmup, reduce pressing load.',
+  groups:[
+    {label:'CHEST', cls:'chest', exs:[
+      ex('pb-fdbp','Flat DB Press','Mid chest — full pec development','compound','4 × 6–8',90,false,true,
+        'Flat angle hits the sternal pec fibers incline misses. DBs allow each shoulder its natural path. Primary push B chest builder.',
+        ['Flat bench. DBs at chest level. 60° elbow rule.','Scapulae retracted and depressed into bench.'],
+        ['Full ROM. Touch chest lightly.','k:Press up and in — DBs travel toward each other. Full lockout.'],
+        ['Inhale and brace down. Exhale and press.'],
+        ['x:Elbows flaring — same 60° rule.','x:Wrists bending back — stack over elbows.'],
+        ['3','1','1','0'],['Down','Pause','Up','Top']),
+      ex('pb-idbp','Incline DB Press','Upper chest · Anterior delt · Tricep','compound','3 × 8–10',75,false,true,
+        'Upper chest development creates the lifted, flat chest look. DB allows natural shoulder arc.',
+        ['Bench 30–45°. DBs kicked up. 60° elbow rule.','Retract and depress scapulae.'],
+        ['Lower to upper chest. Light touch.','k:Press up and in.'],
+        ['Inhale and brace down. Exhale and press.'],
+        ['x:Elbows flaring.','x:Bouncing off chest.'],
+        ['3','1','1','0'],['Down','Pause','Up','Top']),
+      ex('pb-dcfly','Cable Fly (decline angle)','Lower chest · Pec detail — definition','isolation','3 × 10–12',60,false,false,
+        'Slight decline angle hits the lower pec for complete chest definition. Cable maintains tension throughout entire arc.',
+        ['Cables slightly above chest height. Slight forward lean.','k:Soft elbow bend locked in before rep 1.'],
+        ['k:Hug a barrel — arc the arms. Full stretch at the back.','Squeeze and pause 1 second at center. 3-second return.'],
+        ['Inhale opening. Exhale and brace closing.'],
+        ['x:Too much elbow bend — becomes a press.','x:Not opening fully.'],
+        ['3','1','1','1'],['Open','Stretch','Close','Squeeze']),
+    ]},
+    {label:'SHOULDERS', cls:'shoulder', exs:[
+      ex('pb-ap','Arnold Press','All 3 delt heads — complete shoulder development','compound','3 × 8–10',75,true,true,
+        'Hits all three delt heads in one arc. More complete than any single press movement.',
+        ['Seated. Palms facing YOU at start. Core braced every rep.','k:Lighter than standard press — rotation needs control.'],
+        ['Press up rotating continuously — palms face AWAY at top.','k:Smooth arc. Fully reverse on descent.'],
+        ['Inhale and brace before each rep. Exhale pressing and rotating.'],
+        ['x:Too heavy — lose the rotation.','x:Arching lower back.'],
+        ['3','0','2','0'],['Down','—','Up','—']),
+      ex('pb-dlr2','DB Lateral Raise','Medial deltoid — shoulder width','isolation','3 × 10–12',45,false,false,
+        'Medial delt creates the round, capped shoulder. This and cable lateral raise are the two most important shoulder exercises in the program.',
+        ['Slight forward lean 15°. Go light — form first.','k:Pinky slightly higher than thumb.'],
+        ['k:Lead with elbow. Raise to shoulder height. 3-sec lower. 1-sec pause at top.'],
+        ['Exhale raise. Inhale lower.'],
+        ['x:Shrugging traps.','x:Raising above shoulder.','x:Momentum.'],
+        ['3','1','1','0'],['Down','Top','Up','—']),
+    ]},
+    {label:'TRICEPS', cls:'tricep', exs:[
+      ex('pb-sc2','Skull Crusher (EZ bar)','Tricep long head · Mass','isolation','3 × 8–10',75,false,false,
+        'Heavy tricep long head work. Pairs with pushdown for complete arm development.',
+        ['Flat bench. EZ bar above chest. Arms extended.','k:Upper arms angled slightly back — reduces elbow stress.'],
+        ['Lower toward forehead by bending elbows only — upper arms stay still.','k:Stop just above forehead. Press back up along same arc.'],
+        ['Inhale lowering. Exhale pressing.'],
+        ['x:Elbows flaring.','x:Upper arms moving.'],
+        ['3','1','2','1'],['Down','Forehead','Up','Squeeze']),
+      ex('pb-tpd2','Rope Pushdown','All 3 tricep heads · Lateral head detail','isolation','3 × 10–12',60,false,false,
+        'Rope pushdown with separation hits lateral head for the horseshoe definition.',
+        ['High cable, rope. Upper arms pinned to ribs.'],
+        ['Push down and flare rope apart at bottom.','k:Externally rotate wrists at full extension. Squeeze. Hold 1 sec.'],
+        ['Exhale and push. Inhale return.'],
+        ['x:Upper arms drifting forward.','x:Not separating rope at bottom.'],
+        ['—','—','—','—'],['—','—','—','—']),
+    ]},
+    {label:'FINISHER', cls:'finisher', exs:[
+      ex('pb-fin','Rear Delt Fly → Face Pull','Rear delt · External rotators · Shoulder health','isolation','2 × 15 + 15',0,false,true,
+        'Rear delt finisher superset. Rear delt fly followed immediately by face pull. Builds the back of the shoulder for complete roundness.',
+        ['Rear delt fly: cables crossed at face height.','Face pull: rope at face height.'],
+        ['Rear delt fly: open arms wide, squeeze rear delts, hold 2 sec.','Face pull: elbows OUT and UP, wrists behind ears, hold 1 sec.'],
+        ['No rest between the two exercises.'],
+        ['x:Too heavy on either — form breaks.'],
+        ['—','—','—','—'],['—','—','—','—']),
+    ]},
+    {label:'CONDITIONING', cls:'conditioning', exs:[
+      ex('pb-cond','Stair Master — Steady State','Conditioning · Fat loss · Glute activation','conditioning','20 min',0,false,false,
+        'Stair master drives cardiovascular conditioning and glute activation simultaneously. Hands lightly on rails — do not lean.',
+        ['Level 8–12. Hands lightly on rails only for balance.'],
+        ['k:20 min steady pace. Every 5 min: 30 seconds hard surge, then back to steady.','Stand tall — do not lean into the machine.'],
+        ['Breathe steadily throughout. The surges should be genuinely hard.'],
+        ['x:Leaning heavily on rails — reduces effort and glute activation.','x:Going too slow — should feel moderately challenging throughout.'],
+        ['—','—','—','—'],['—','—','—','—']),
+    ]},
+    {label:'ABS', cls:'abs', exs:[
+      ex('pb-cc3','Cable Crunch','Rectus abdominis','isolation','2 × 15',20,true,false,
+        'Constant cable tension. Safest weighted ab exercise for L2-S1. Builds visible abs.',
+        ['Rope high on cable. Kneel facing stack. Hips fixed.'],
+        ['k:Crunch rib cage toward pelvis. Hold 1 second. Full contraction.'],
+        ['Exhale and crunch. Squeeze. Inhale returning.'],
+        ['x:Pulling with arms.','x:Hips dropping.'],
+        ['3','1','1','1'],['Down','Squeeze','Up','Extend']),
+      ex('pb-vac2','Vacuum Hold','TVA — slim waist corset muscle','isolation','2 × 30s',20,false,false,
+        'Trains the TVA corset muscle. Consistent practice measurably reduces resting waist circumference. Do this every session it appears.',
+        ['Exhale ALL air completely. Stand, sit, or kneel.','k:Pull belly button toward spine as hard as possible.'],
+        ['k:Hold 30 seconds. Build to 60 seconds over time.'],
+        ['Exhale completely first. Light nostril breaths only during hold.'],
+        ['x:Not fully exhaling first.','x:Less than 30s — too short for adaptation.'],
+        ['—','—','—','—'],['—','—','—','—']),
+    ]},
+  ],
+  cooldown:'Doorway chest stretch 60s each · Cross-body shoulder 45s each · Overhead tricep stretch 45s each · Shoulder CARs 5 each.',
+},
+
+pull_b:{
+  title:'PULL B — THICKNESS DAY',
+  sub:'Back Thickness · Bicep Density · Traps',
+  tags:[['Thickness Focus','ac'],['45–55 min',''],['Face Pull Mandatory','bl']],
+  injury:'Face pull every pull session without exception. Shoulder health is a long game — one skipped session becomes a habit.',
+  groups:[
+    {label:'BACK', cls:'back', exs:[
+      ex('plb-sadr','Single-Arm DB Row','Lats · Rhomboids · Rear delt — unilateral','compound','4 × 8–10 ea',60,true,false,
+        'Unilateral row allows full ROM and greater lat stretch. Addresses left-right imbalances common with L2-S1 issues.',
+        ['Knee and hand on bench. Spine parallel to floor — check mirror.','k:Flat and neutral spine throughout — any rounding and stop.'],
+        ['k:Drive elbow UP and BACK — not just lift the weight.','Full hang at bottom. Full row at top. Big ROM.'],
+        ['Exhale rowing up. Inhale back to full hang.'],
+        ['x:Torso rotation to complete the rep.','x:Rounded lower back — especially dangerous unilateral.'],
+        ['3','1','2','1'],['Down','Bottom','Up','Squeeze']),
+      ex('plb-scr','Seated Cable Row','Mid-back · Rhomboids · Lower traps','compound','4 × 8–10',75,true,false,
+        'Cable row builds mid-back thickness that creates the 3D defined back look. Seated protects L2-S1 when form is strict.',
+        ['V-bar or close handle. Sit tall — spine neutral. 15° lean at start only.','k:Keep torso upright — row with arms, not back.'],
+        ['Drive elbows back. Squeeze scapulae hard. Full extension on return.','k:Torso stays still — only arms move. Zero rocking.'],
+        ['Brace core before each pull. Exhale rowing. Inhale return.'],
+        ['x:Rocking torso — momentum not muscle.','x:Rounding lower back at stretch.'],
+        ['3','1','2','1'],['Out','Bottom','In','Squeeze']),
+      ex('plb-sal','Straight-Arm Pulldown','Lats — isolation with straight arms','isolation','3 × 12–15',60,false,false,
+        'Straight-arm pulldown isolates the lat without bicep involvement. Builds the sweep and detail in the lat.',
+        ['High cable, rope or straight bar. Stand facing stack.','k:Arms stay straight — elbows slightly bent and LOCKED. No bending.'],
+        ['k:Drive elbows toward hips in a wide arc. Feel the lat contracting.','Squeeze at the bottom. Return slowly to full stretch.'],
+        ['Exhale driving down. Inhale returning slowly.'],
+        ['x:Bending elbows — turns it into a pulldown.','x:Using momentum to swing the weight.'],
+        ['3','1','2','1'],['Up','Top','Down','Squeeze']),
+    ]},
+    {label:'BICEPS', cls:'bicep', exs:[
+      ex('plb-cc2','Cable Curl','Bicep — constant tension finisher','isolation','3 × 10–12',45,false,false,
+        'Cable gives constant tension at the bottom where DBs have zero. Used as density finisher after compound pulling.',
+        ['Low cable. Elbows pinned to ribs.','k:Cable gives tension DBs cannot at the bottom.'],
+        ['Supinate fully at top. Hold peak 1 second. Lower fully.'],
+        ['Exhale curl. Inhale lowering.'],
+        ['x:Elbows drifting forward.','x:Not reaching full extension at bottom.'],
+        ['3','1','2','1'],['Down','—','Curl','Squeeze']),
+      ex('plb-hc3','Hammer Curl','Brachialis — arm density','isolation','3 × 10–12',45,false,false,
+        'Brachialis builds arm density. Pairs with cable curl for complete bicep development.',
+        ['Neutral grip. Elbows pinned.','k:No supination.'],
+        ['3-second eccentric every rep.'],
+        ['Exhale curl. Inhale through 3-second lower.'],
+        ['x:Supinating.','x:Elbows swinging.'],
+        ['3','0','1','0'],['Down','—','Up','—']),
+    ]},
+    {label:'TRAPS', cls:'traps', exs:[
+      ex('plb-shrug2','DB Shrug (2-sec hold)','Upper traps — definition and mass','isolation','3 × 10–12',60,false,false,
+        'Upper traps hit on both pull days for enough frequency to develop the thick, defined trap look.',
+        ['DBs at sides. Stand tall.','k:Straight UP and DOWN. No rolling.'],
+        ['Shrug as high as possible. Hold 2 full seconds at top.','k:No rolling. Pure elevation.'],
+        ['Exhale up. Hold. Inhale lowering.'],
+        ['x:Rolling.','x:No hold — momentum does the work.'],
+        ['2','2','2','0'],['Up','Hold','Down','—']),
+      ex('plb-upr','Cable Upright Row (wide grip)','Mid traps · Upper traps · Rear delt','isolation','3 × 10–12',60,false,true,
+        'Wide-grip upright row hits mid and upper traps and rear delt. WIDE grip only — narrow causes impingement.',
+        ['Cable straight bar or rope. Grip wide — hands wider than shoulders.','k:Wide grip is what keeps this shoulder-safe. Narrow grip causes impingement.'],
+        ['Pull to upper chest with elbows going OUT — not straight up.','k:Elbows stay BELOW shoulder height. Going higher causes impingement.'],
+        ['Exhale pulling up. Inhale lowering.'],
+        ['x:Narrow grip — impingement.','x:Elbows above shoulder height.'],
+        ['2','1','2','0'],['Up','Top','Down','—']),
+    ]},
+    {label:'FINISHER', cls:'finisher', exs:[
+      ex('plb-fin','Face Pull → Incline DB Curl','Shoulder health · Bicep peak finisher','isolation','2 × 15 + 12',0,false,true,
+        'Face pull mandatory on every pull day. Incline curl finisher hits the bicep long head in the stretched position for peak development.',
+        ['Face pull: rope at face height.','Incline curl: bench 45°, arms hang behind torso.'],
+        ['Face pull: elbows OUT and UP. Squeeze. Hold 1 sec.','Incline curl: supinate wrist, lower to full hang every rep.'],
+        ['No rest between exercises.'],
+        ['x:Face pull too heavy.','x:Not lowering incline curl to full hang.'],
+        ['—','—','—','—'],['—','—','—','—']),
+    ]},
+    {label:'CONDITIONING', cls:'conditioning', exs:[
+      ex('plb-cond','Rowing Ergometer','Conditioning · Fat loss · Posterior chain','conditioning','4 × 500m',90,true,false,
+        'Rowing hits posterior chain while driving conditioning. Legs-drive-finish every stroke.',
+        ['Damper 5–6. Feet strapped.','k:Legs → lean back → arms pull. That sequence every stroke.'],
+        ['k:4 × 500m at 85% effort. 90s rest between. ~8 min total.','Strokes per minute 22–26.'],
+        ['Breathe rhythmically with each stroke.'],
+        ['x:Arms pulling before legs finish.','x:Hunching over the handle.'],
+        ['—','—','—','—'],['—','—','—','—']),
+    ]},
+    {label:'ABS', cls:'abs', exs:[
+      ex('plb-hkr2','Hanging Knee Raise','Lower abs — lower ab definition','isolation','2 × 12',20,true,false,
+        'Lower ab definition. Posterior pelvic tilt at top activates lower abs vs just hip flexors.',
+        ['Dead hang from bar. Shoulders packed down.','k:Knees bent — safer and effective.'],
+        ['k:Tuck pelvis UNDER as knees rise. That is what activates lower abs.','Hold 1 sec at top. Lower with full control.'],
+        ['Exhale as knees rise. Inhale lowering.'],
+        ['x:No pelvic tilt — becomes a hip flexor exercise.','x:Swinging.'],
+        ['3','1','1','1'],['Down','—','Up','Hold']),
+      ex('plb-pall2','Pallof Press','Obliques — anti-rotation, slim waist','isolation','2 × 12 ea',20,true,false,
+        'Anti-rotation oblique training creates the tapered waist. Safest oblique work for L2-S1.',
+        ['Cable at chest height. Perpendicular to cable.','k:Brace core before every rep.'],
+        ['Press straight out. Hold 2 seconds. Return.','k:The cable tries to rotate you. Resist. That resistance IS the exercise.'],
+        ['Exhale pressing out. Hold brace during 2-second hold.'],
+        ['x:Rotating toward cable.','x:Not bracing.'],
+        ['1','2','2','0'],['Out','Hold','In','—']),
+    ]},
+  ],
+  cooldown:'Lat hang from bar 45s · Doorway bicep stretch 60s each arm · Upper trap stretch 45s each · Child\'s pose 90s.',
+},
+
+legs_b:{
+  title:'LEGS B — STRENGTH FOCUS',
+  sub:'Progressive Overload · Glute · Quad · Hamstring · Calf',
+  tags:[['Strength Focus','ac'],['45–55 min',''],['L2-S1 Adapted','wn']],
+  injury:'L2-S1: same rules as Legs A. No barbell squats, no heavy RDLs. Go heavier than Legs A on hip thrust if last session felt manageable. Core brace before every rep.',
+  groups:[
+    {label:'GLUTE', cls:'glute', exs:[
+      ex('lb-ht','Hip Thrust — Go Heavier','Glutes — strength progression session','compound','4 × 8–10',90,true,false,
+        'This is the progressive strength session. Add weight from Legs A if that session felt manageable at RPE ≤7.',
+        ['Upper back at mid-scapula on bench. Feet flat, shoulder-width.','k:Chin tucked throughout — prevents hyperextension.'],
+        ['k:Posterior pelvic tilt at top — tuck pelvis under every rep.','2-second hold every rep. Heavier than Legs A.'],
+        ['Inhale and brace before each rep. Exhale driving up.'],
+        ['x:Hyperextending at top — reduce load if this happens.','x:No 2-second pause.'],
+        ['2','2','1','0'],['Down','Squeeze','Up','Bottom']),
+      ex('lb-cpt2','Cable Pull-Through','Glutes · Hamstrings — hip hinge activation','compound','3 × 15',60,true,false,
+        'Opens the posterior chain before heavier loading. Always.',
+        ['Low cable, rope. Facing away. Feet straddle cable.'],
+        ['Hinge hips BACK — spine neutral. Drive hips forward. Squeeze glutes at top.'],
+        ['Inhale and brace on hinge. Exhale forcefully on hip drive.'],
+        ['x:Squatting not hinging.','x:Rounding lower back.'],
+        ['—','—','—','—'],['—','—','—','—']),
+    ]},
+    {label:'QUADS', cls:'quad', exs:[
+      ex('lb-lp','Leg Press','Quads · Glutes — volume builder','compound','4 × 10–12',75,true,false,
+        'Leg press allows heavier quad loading without spinal compression. Good complement to the unilateral BSS.',
+        ['Feet mid-platform, shoulder-width. Toes slightly out.','k:Back fully against pad — do not let it peel off.'],
+        ['Push through full foot. Nearly full lockout — not hard lock.','k:3-second controlled descent. Do not let lower back round off the pad.'],
+        ['Inhale and brace as sled comes toward you. Exhale pushing.'],
+        ['x:Lower back peeling off pad — reduce ROM immediately.','x:Hard knee lockout — keeps joint stress.'],
+        ['3','1','1','0'],['Down','Bottom','Up','Top']),
+      ex('lb-bss2','Bulgarian Split Squat (DB)','Quads · Glutes — strength progression','compound','3 × 8–10 ea',75,true,false,
+        'Go heavier than Legs A if that session felt manageable.',
+        ['Rear foot on bench. Front foot forward enough for vertical shin.','k:Upright torso — forward lean loads lower back.'],
+        ['Lower hips straight DOWN. Front knee over 2nd toe.','Drive through front heel.'],
+        ['Inhale and brace before lowering. Exhale driving back up.'],
+        ['x:Torso leaning forward.','x:Knee caving inward.'],
+        ['3','1','1','0'],['Down','Bottom','Up','Top']),
+    ]},
+    {label:'HAMSTRINGS', cls:'hamstring', exs:[
+      ex('lb-lc2','Seated Leg Curl — Heavier','Hamstrings — progression session','isolation','3 × 10–12',60,true,false,
+        'Go heavier than Legs A if RPE was ≤7 last session. The progressive session.',
+        ['Seated — back fully against seat. Thigh pad snug.'],
+        ['Full extension at start. 3-second eccentric. Plantarflex at peak. Squeeze 1 second.','k:These three cues every rep. Non-negotiable.'],
+        ['Exhale curl. Inhale through 3-second lower.'],
+        ['x:Dropping fast — the eccentric is the stimulus.','x:Not starting from full extension.'],
+        ['3','1','1','1'],['Down','—','Curl','Squeeze']),
+      ex('lb-rdl2','Light DB Romanian Deadlift','Hamstrings · Glutes — pattern reinforcement','isolation','3 × 12–15',60,true,false,
+        'Same as Legs A — light load, perfect pattern.',
+        ['Light DBs only. Feet hip-width. Micro-bend in knees locked.','k:Natural neutral spine throughout.'],
+        ['Push hips back. DBs slide down thighs close to legs.','k:Lower until strong hamstring stretch — mid-shin. Drive hips forward to return.'],
+        ['Inhale and brace. Exhale driving forward.'],
+        ['x:Rounding lower back — stop immediately.','x:Going heavy — pattern only.'],
+        ['3','1','1','1'],['Down','Stretch','Up','Squeeze']),
+    ]},
+    {label:'CALVES', cls:'calf', exs:[
+      ex('lb-scr','Standing Calf Raise (machine or DB)','Gastrocnemius · Soleus — bilateral version','isolation','3 × 15–20',45,false,false,
+        'Bilateral calf raise on Legs B for slightly more loading than single-leg on Legs A.',
+        ['Ball of foot on edge. Both feet this session.'],
+        ['Rise to full plantar flexion. Pause 1 second. 3-second descent to full stretch.','k:Full ROM every single rep.'],
+        ['Exhale rising. Inhale descending.'],
+        ['x:Short ROM — heel not dropping fully.','x:Bouncing at bottom.'],
+        ['3','1','1','1'],['Down','Bottom','Up','Top']),
+    ]},
+    {label:'ABS', cls:'abs', exs:[
+      ex('lb-dbu2','Dead Bug','TVA · Deep core — L2-S1 stabilization','isolation','2 × 10 ea',20,true,false,
+        'TVA is the primary L2-S1 protective muscle. Building it reduces disc loading on every exercise.',
+        ['Lie on back. Arms toward ceiling. Knees 90° raised.','k:Lower back PRESSED flat to floor throughout.'],
+        ['Extend opposite arm and leg toward floor. Keep lower back flat.','k:Only go as far as lower back stays flat. Return and switch.'],
+        ['Exhale extending. Inhale returning.'],
+        ['x:Lower back lifting — reduce range.','x:Moving too fast.'],
+        ['4','1','4','0'],['Extend','Hold','Return','—']),
+      ex('lb-abw2','Ab Wheel Rollout','Full core — anti-extension','isolation','2 × 10',20,true,false,
+        'Anti-extension training develops deep core for the flat, defined midsection.',
+        ['Kneel on mat. Ab wheel, both hands.','k:Start small range. Lower back dips = stop.'],
+        ['Roll forward, lower back flat. Roll back using core only.','k:Hips do not drop. Back stays neutral.'],
+        ['Exhale rolling out. Inhale rolling back.'],
+        ['x:Hips dropping.','x:Going too far too soon.'],
+        ['3','1','3','0'],['Out','Hold','Back','—']),
+    ]},
+  ],
+  cooldown:'90/90 hip stretch 90s each · Pigeon pose 90s each · Hip flexor lunge 60s each · Seated hamstring stretch 60s each · Cat-cow 1 min · Child\'s pose 2 min.',
+},
+
+rest_a:{type:'rest'},
+rest_b:{type:'rest'},
+};
+
+// ═══════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════
+let curDay=0,isDeload=false,timeBudget=55,setsToday=0;
+let timerInt=null,timerSec=0,timerTotal=0,timerPaused=false,timerExName='',timerEndTs=0,timerPausedRemaining=0;
+let appData={};
+
+function loadData(){try{appData=JSON.parse(localStorage.getItem('st3_data')||'{}');}catch(e){appData={};}
+  if(!appData.sessions)appData.sessions={};
+  if(!appData.bwLog)appData.bwLog=[];
+  if(!appData.totalSets)appData.totalSets=0;}
+function saveData(){localStorage.setItem('st3_data',JSON.stringify(appData));}
+loadData();
+
+// ═══════════════════════════════════════════
+// REST TIMER
+// ═══════════════════════════════════════════
+function startTimer(sec,name){
+  if(timerInt)clearInterval(timerInt);
+  timerTotal=sec;timerSec=sec;timerPaused=false;timerPausedRemaining=0;timerExName=name;
+  timerEndTs=Date.now()+(sec*1000);
+  document.getElementById('rt').classList.add('vis');
+  document.getElementById('rt-ex').textContent=name;
+  document.getElementById('rt-pause-btn').textContent='PAUSE';
+  document.removeEventListener('visibilitychange',onVisChange);
+  document.addEventListener('visibilitychange',onVisChange);
+  tickTimer();
+  timerInt=setInterval(tickTimer,500);
+}
+function onVisChange(){
+  // When screen wakes up, recalculate from wall clock
+  if(!document.hidden&&timerInt&&!timerPaused)tickTimer();
+}
+function tickTimer(){
+  if(timerPaused)return;
+  const remaining=Math.max(0,Math.round((timerEndTs-Date.now())/1000));
+  timerSec=remaining;
+  updateTimer();
+  if(remaining<=0){clearInterval(timerInt);timerInt=null;timerDone();}
+}
+function updateTimer(){
+  const m=Math.floor(timerSec/60),s=timerSec%60;
+  const tel=document.getElementById('rt-time'),bar=document.getElementById('rt-fill');
+  if(!tel)return;
+  tel.textContent=`${m}:${s.toString().padStart(2,'0')}`;
+  const pct=timerTotal>0?(timerSec/timerTotal)*100:0;
+  bar.style.width=pct+'%';
+  const urg=timerSec<=10&&timerSec>0;
+  tel.classList.toggle('urg',urg);
+  bar.classList.toggle('urg',urg);
+}
+function timerDone(){
+  // Visual flash — reliable on all devices including iOS
+  const rt=document.getElementById('rt');
+  let f=0;const fi=setInterval(()=>{
+    rt.style.borderTopColor=f%2===0?'var(--green)':'var(--warn)';
+    f++;if(f>=8){clearInterval(fi);rt.style.borderTopColor='var(--accent)';}
+  },180);
+  // Audio — works on Android + desktop, silently skips on iOS (requires prior user gesture)
+  try{
+    const ctx=new(window.AudioContext||window.webkitAudioContext)();
+    [0,220,440].forEach(d=>{
+      const o=ctx.createOscillator(),g=ctx.createGain();
+      o.connect(g);g.connect(ctx.destination);
+      o.frequency.value=880;g.gain.setValueAtTime(0.25,ctx.currentTime+d/1000);
+      g.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+d/1000+0.3);
+      o.start(ctx.currentTime+d/1000);o.stop(ctx.currentTime+d/1000+0.35);
+    });
+  }catch(e){}
+  showToast('✓ Rest done — go!');
+  setTimeout(()=>{if(rt)rt.classList.remove('vis');},4000);
+}
+function pauseTimer(){
+  timerPaused=!timerPaused;
+  document.getElementById('rt-pause-btn').textContent=timerPaused?'RESUME':'PAUSE';
+  if(timerPaused){
+    timerPausedRemaining=Math.max(0,Math.round((timerEndTs-Date.now())/1000));
+  } else {
+    timerEndTs=Date.now()+(timerPausedRemaining*1000);
+    tickTimer();
+  }
+}
+function resetTimer(){if(timerInt){clearInterval(timerInt);timerInt=null;}startTimer(timerTotal,timerExName);}
+function skipTimer(){if(timerInt){clearInterval(timerInt);timerInt=null;}document.getElementById('rt').classList.remove('vis');}
+
+// ═══════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════
+function init(){
+  document.getElementById('cur-date').textContent=new Date().toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'}).toUpperCase();
+  curDay=parseInt(localStorage.getItem('st3_day')||'0');
+  buildDayGrid();renderWorkout();updateStatus();
 }
 
-function buildExercise(ex, dayId) {
-  const sessionKey = `${dayId}-${ex.id}`;
-  const lastSession = sessionData[sessionKey] || null;
-  const numSets = parseInt(ex.target.split('×')[0].replace(/\D/g,'')) || 3;
-
-  const targetDisplay = isDeload
-    ? ex.target.replace(/(\d+)/g, n => Math.round(parseInt(n)*0.6)) + ' <span style="color:var(--warn);font-size:12px">(DELOAD)</span>'
-    : ex.target;
-
-  const lastHtml = lastSession
-    ? `<span class="last-label">LAST</span><span class="last-val">${lastSession.weight}lb × ${lastSession.reps} @ RPE ${lastSession.rpe}</span>${lastSession.notes ? `<span style="font-size:10px;color:var(--muted);font-family:var(--mono)"> — ${lastSession.notes}</span>` : ''}`
-    : `<span class="last-label">LAST</span><span style="font-family:var(--mono);font-size:11px;color:var(--muted)">No prior data</span>`;
-
-  const sets = Array.from({length: numSets}, (_,i) => buildSetRow(ex.id, i+1, lastSession, dayId)).join('');
-
-  const formHtml = buildFormPanel(ex);
-
-  const spineHtml = ex.spine ? `<span class="spine-badge">L2S1</span>` : '';
-
-  return `
-    <div class="ex-block${ex.spine ? ' spine-warn' : ''}" id="block-${ex.id}">
-      <div class="ex-main">
-        <div>
-          <div class="ex-name-row">
-            <span class="ex-name">${ex.name}</span>${spineHtml}
-          </div>
-          <div class="ex-muscle">${ex.muscle}</div>
-        </div>
-        <div class="ex-right">
-          <div class="ex-target${isDeload?' deload-mode':''}">${ex.target}</div>
-          <div class="ex-rest-label">REST ${ex.rest}</div>
-        </div>
-      </div>
-      <div class="ex-last">
-        ${lastHtml}
-        <button class="form-toggle-btn" onclick="toggleForm('${ex.id}')">▸ FORM</button>
-      </div>
-      ${formHtml}
-      <div class="log-section">
-        <div class="log-section-title">Log Sets</div>
-        <div class="set-rows" id="sets-${ex.id}">${sets}</div>
-        <div class="notes-row">
-          <textarea class="notes-input" id="notes-${ex.id}" placeholder="Exercise notes..." rows="1"></textarea>
-        </div>
-      </div>
-    </div>`;
+function buildDayGrid(){
+  const g=document.getElementById('day-grid');g.innerHTML='';
+  DAYS.forEach((d,i)=>{
+    const b=document.createElement('div');
+    b.className='db'+(d.isRest?' rest':'')+(i===curDay?' active':'');
+    b.innerHTML=`<span class="db-n">${i+1}</span><span class="db-l">${d.label}</span>`;
+    b.onclick=()=>selectDay(i);g.appendChild(b);
+  });
 }
 
-function buildSetRow(exId, setNum, lastSession, dayId) {
-  const lastW = lastSession ? lastSession.weight : '';
-  const lastR = lastSession ? lastSession.reps : '';
-  const rpeOpts = ['—','6','6.5','7','7.5','8','8.5','9','9.5','10'].map(v =>
-    `<option value="${v}">${v}</option>`).join('');
-  return `
-    <div class="set-row" id="setrow-${exId}-${setNum}">
-      <span class="set-num">${setNum}</span>
-      <input class="set-input" id="w-${exId}-${setNum}" type="number" placeholder="${lastW || 'lb'}" step="0.5" inputmode="decimal"/>
-      <input class="set-input" id="r-${exId}-${setNum}" type="number" placeholder="${lastR || 'reps'}" inputmode="numeric"/>
-      <select class="rpe-select" id="rpe-${exId}-${setNum}">${rpeOpts}</select>
-      <div></div>
-      <button class="save-set-btn" id="savebtn-${exId}-${setNum}" onclick="saveSet('${exId}','${setNum}','${dayId}')">SAVE</button>
-    </div>`;
-}
-
-function buildFormPanel(ex) {
-  const grid = `
-    <div class="form-grid">
-      <div>
-        <div class="cue-title setup">Setup</div>
-        <ul class="cue-list">${ex.setup.map(c => formatCue(c)).join('')}</ul>
-      </div>
-      <div>
-        <div class="cue-title exec">Execution</div>
-        <ul class="cue-list">${ex.exec.map(c => formatCue(c)).join('')}</ul>
-      </div>
-      <div>
-        <div class="cue-title breath">Breathing</div>
-        <ul class="cue-list">${ex.breath.map(c => formatCue(c)).join('')}</ul>
-      </div>
-      <div>
-        <div class="cue-title err">Common Mistakes</div>
-        <ul class="cue-list">${ex.mistakes.map(c => formatCue(c)).join('')}</ul>
-      </div>
-    </div>`;
-
-  const hasTempo = ex.tempo && ex.tempo[0] !== '—';
-  const tempoHtml = hasTempo ? `
-    <div class="tempo-row">
-      <span class="tempo-label-text">Tempo</span>
-      ${ex.tempo.map((t,i) => `
-        <div class="tbox"><div class="tnum">${t}</div><div class="tphase">${ex.tempoLabels[i]}</div></div>
-        ${i < ex.tempo.length-1 ? '<span class="tsep">·</span>' : ''}`).join('')}
-    </div>` : '';
-
-  return `<div class="form-panel" id="form-${ex.id}">${grid}${tempoHtml}</div>`;
-}
-
-function formatCue(c) {
-  if (c.startsWith('key:')) return `<li class="key">${c.slice(4)}</li>`;
-  if (c.startsWith('bad:')) return `<li class="bad">${c.slice(4)}</li>`;
-  return `<li>${c}</li>`;
-}
-
-// ═══════════════════════════════════════════════
-// INTERACTIONS
-// ═══════════════════════════════════════════════
-
-function toggleWarmup() {
-  const block = document.getElementById('warmup-block');
-  if (!block) return;
-  block.classList.toggle('open');
-}
-
-function toggleForm(exId) {
-  const block = document.getElementById(`block-${exId}`);
-  const wasOpen = block.classList.contains('form-open');
-  // Close all
-  document.querySelectorAll('.ex-block.form-open').forEach(b => b.classList.remove('form-open'));
-  if (!wasOpen) block.classList.add('form-open');
-}
-
-function handleDeload() {
-  isDeload = document.getElementById('deload-toggle').checked;
-  const wrap = document.getElementById('deload-wrap');
-  const status = document.getElementById('deload-status');
-  wrap.classList.toggle('active', isDeload);
-  status.style.display = isDeload ? 'flex' : 'none';
+function selectDay(i){
+  curDay=i;localStorage.setItem('st3_day',i);
+  document.querySelectorAll('.db').forEach((b,idx)=>b.classList.toggle('active',idx===i));
   renderWorkout();
 }
 
-function updateTimeBudget(val) {
-  // Could filter exercises by time in future
-  console.log('Time budget:', val);
+function goTab(t){
+  ['train','dash','supps'].forEach((id,i)=>{
+    document.getElementById('tab-'+id).style.display=t===id?'block':'none';
+    document.querySelectorAll('.ntab')[i].classList.toggle('active',t===id);
+  });
+  if(t==='dash')buildDash();
 }
 
-// ═══════════════════════════════════════════════
-// LOGGING
-// ═══════════════════════════════════════════════
-
-function saveSet(exId, setNum, dayId) {
-  const w = document.getElementById(`w-${exId}-${setNum}`)?.value;
-  const r = document.getElementById(`r-${exId}-${setNum}`)?.value;
-  const rpe = document.getElementById(`rpe-${exId}-${setNum}`)?.value || '—';
-  const notes = document.getElementById(`notes-${exId}`)?.value || '';
-
-  if (!w || !r) { showToast('Enter weight and reps ✗', true); return; }
-
-  const btn = document.getElementById(`savebtn-${exId}-${setNum}`);
-  btn.textContent = '✓';
-  btn.classList.add('saved');
-  btn.disabled = true;
-
-  // Update last session memory
-  const sessionKey = `${dayId}-${exId}`;
-  sessionData[sessionKey] = { weight: w, reps: r, rpe, notes, date: new Date().toISOString() };
-  saveSessionData();
-
-  // Update count
-  setsLoggedToday++;
-  document.getElementById('sets-logged').textContent = setsLoggedToday;
-
-  // Log to Google Sheets
-  if (sheetUrl) logToSheets({ date: new Date().toLocaleDateString(), day: CYCLE[currentDay].label + ' ' + (currentDay+1), exercise: exId, set: setNum, weight: w, reps: r, rpe, notes, deload: isDeload ? 'YES' : 'NO' });
-
-  showToast('Set saved ✓');
+// ═══════════════════════════════════════════
+// RENDER WORKOUT
+// ═══════════════════════════════════════════
+function renderWorkout(){
+  const area=document.getElementById('workout-area');
+  const wk=W[DAYS[curDay].id];
+  if(!wk||wk.type==='rest'){
+    area.innerHTML=`<div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:36px 14px;text-align:center">
+      <div style="font-family:var(--cond);font-size:52px;font-weight:900;color:var(--muted);letter-spacing:-3px">REST</div>
+      <div style="font-family:var(--cond);font-size:16px;font-weight:700;text-transform:uppercase;letter-spacing:2px;color:var(--muted);margin:7px 0 14px">Active Recovery</div>
+      <p style="font-size:12px;color:var(--muted);line-height:1.8;max-width:300px;margin:0 auto">Walk 20–30 min. Full mobility sequence. 180g protein. 3L water. Magnesium before bed.<br><br><strong style="color:var(--text2)">Your body builds on rest days. This is not optional.</strong></p>
+    </div>`;
+    return;
+  }
+  const dlBanner=isDeload?`<div style="background:var(--wdim);border:1px solid rgba(255,61,0,0.3);border-radius:4px;padding:8px 11px;margin-bottom:10px;font-family:var(--mono);font-size:8px;color:var(--warn);letter-spacing:1.5px;text-transform:uppercase">⚠ DELOAD — 60% LOADS · LONGER REST · FOCUS FORM</div>`:'';
+  const intelHtml=buildIntel(DAYS[curDay].id);
+  const wuHtml=buildWarmupHtml();
+  const injHtml=`<div class="inj"><strong>🦴 Injury Protocol:</strong> ${wk.injury}</div>`;
+  let groupsHtml='';
+  wk.groups.forEach(g=>{
+    groupsHtml+=`<div class="mg-lbl ${g.cls}">${g.label}</div>`;
+    g.exs.forEach(e=>groupsHtml+=buildEx(e,DAYS[curDay].id));
+  });
+  const coolHtml=`<div class="cool-card"><div class="cool-ttl">🧘 Cooldown & Stretch</div><p>${wk.cooldown}</p></div>`;
+  area.innerHTML=`
+    <div class="wk-card">
+      <div class="wk-day-l">${DAYS[curDay].label} · Day ${curDay+1}</div>
+      <div class="wk-ttl">${wk.title}</div>
+      <div class="wk-sub">${wk.sub}</div>
+      <div class="wk-tags">${wk.tags.map(t=>`<span class="wtag ${t[1]}">${t[0]}</span>`).join('')}</div>
+      <div class="time-row">
+        <span class="time-lbl">Budget</span>
+        <div class="time-opts">${[45,55,60].map(m=>`<div class="topt${timeBudget===m?' active':''}" onclick="setTime(${m})">${m}m</div>`).join('')}</div>
+      </div>
+    </div>
+    ${dlBanner}${intelHtml}${wuHtml}${injHtml}
+    ${groupsHtml}
+    ${coolHtml}`;
 }
 
-async function logToSheets(data) {
-  try {
-    await fetch(sheetUrl, {
-      method: 'POST',
-      mode: 'no-cors',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data)
-    });
-  } catch(e) { console.warn('Sheets log failed:', e); }
+function buildIntel(dayId){
+  const wk=W[dayId];
+  if(!wk||!wk.groups)return'';
+  let allExs=[];wk.groups.forEach(g=>g.exs.forEach(e=>allExs.push(e)));
+  let hasData=false,up=[],down=[];
+  allExs.forEach(e=>{
+    const k=`${dayId}-${e.id}`;const hist=appData.sessions[k]||[];
+    if(hist.length>=2){hasData=true;const l=hist[hist.length-1],p=hist[hist.length-2];
+      if(l.rpe<=7&&p.rpe<=7&&l.weight===p.weight)up.push(e.name);
+      if(l.rpe>=9&&p.rpe>=9)down.push(e.name);}
+  });
+  if(!hasData)return`<div class="intel"><div class="intel-t">▸ INTELLIGENT PROGRESSION</div><div class="intel-m">Log your first session. After 2 sessions on any exercise the app tells you whether to <strong>add weight, stay, or reduce</strong> based on your RPE data.</div></div>`;
+  let h='';
+  if(up.length)h+=`<div class="intel"><div class="intel-t">▲ READY TO PROGRESS</div><div class="intel-m">RPE ≤7 last 2 sessions at the same weight on <strong>${up.join(', ')}</strong>. <strong>Add 5lb today.</strong></div></div>`;
+  if(down.length)h+=`<div class="intel warn"><div class="intel-t">⚠ REDUCE LOAD</div><div class="intel-m">RPE 9+ last 2 sessions on <strong>${down.join(', ')}</strong>. Reduce 10% or enable Deload Week.</div></div>`;
+  if(!up.length&&!down.length)h+=`<div class="intel blue"><div class="intel-t">✓ ON TRACK</div><div class="intel-m">Load is appropriate. Match or beat last session reps. Progression is building.</div></div>`;
+  return h;
 }
 
-function showToast(msg, isErr) {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.style.borderLeftColor = isErr ? 'var(--warn)' : 'var(--green)';
-  t.style.color = isErr ? 'var(--warn)' : 'var(--green)';
-  t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 2000);
+function buildWarmupHtml(){
+  const items=WU.map(w=>`<div class="wm"><div class="wm-n">${w.n}</div><div class="wm-name">${w.name}</div><div class="wm-t">${w.t}</div><div class="wm-d">${w.d}</div></div>`).join('');
+  return`<div class="wu" id="wu-block"><div class="wu-hdr" onclick="toggleWU()"><div class="wu-ttl">🔄 WARMUP — Elliptical + Mobility (~12 min)</div><div class="wu-ch" id="wu-ch">▼</div></div><div class="wu-body"><div class="wu-grid">${items}</div></div></div>`;
 }
 
-function toggleSheetConfig() {
-  const cfg = document.getElementById('sheet-config');
-  cfg.classList.toggle('visible');
+function buildEx(e,dayId){
+  const k=`${dayId}-${e.id}`;
+  const hist=appData.sessions[k]||[];
+  const last=hist.length?hist[hist.length-1]:null;
+  const ns=parseInt(e.target.split('×')[0].replace(/\D/g,''))||3;
+  const targetDisp=isDeload?e.target.replace(/(\d+(?:\.\d+)?)/g,n=>Math.round(n*0.7))+'*':e.target;
+
+  let pc='new',pt='▸ FIRST SESSION';
+  if(hist.length===1){pc='hold';pt='▸ 2ND SESSION — '+hist[0].weight+'lb × '+hist[0].reps+' @ RPE'+hist[0].rpe;}
+  if(hist.length>=2){const l=hist[hist.length-1],p=hist[hist.length-2];
+    if(l.rpe<=7&&p.rpe<=7&&l.weight===p.weight){pc='up';pt='▲ ADD 5lb — Last: '+l.weight+'lb × '+l.reps+' @ RPE'+l.rpe;}
+    else if(l.rpe>=9&&p.rpe>=9){pc='down';pt='▽ REDUCE 10% — Last: '+l.weight+'lb × '+l.reps+' @ RPE'+l.rpe;}
+    else{pc='hold';pt='▸ MATCH OR BEAT — '+l.weight+'lb × '+l.reps+' @ RPE'+l.rpe;}}
+
+  const isCond=e.type==='conditioning';
+  const badgeArr=[
+    e.spine?'<span class="badge s">L2S1</span>':'',
+    e.shldr?'<span class="badge sh">SHOULDER</span>':'',
+    e.type==='compound'?'<span class="badge cmp">COMPOUND</span>':'',
+    isCond?'<span class="badge fin">CONDITIONING</span>':'',
+    e.type==='isolation'&&e.id.includes('fin')?'<span class="badge fin">FINISHER</span>':'',
+    e.id.includes('cc')||e.id.includes('hkr')||e.id.includes('dbu')||e.id.includes('pall')||e.id.includes('abw')||e.id.includes('mcg')||e.id.includes('vac')?'<span class="badge abs">ABS</span>':'',
+  ].join('');
+
+  const sets=isCond?''
+    :Array.from({length:ns},(_,i)=>buildSetRow(e.id,i+1,last,dayId,isDeload?Math.round(e.rest*1.5):e.rest,e.name)).join('');
+  const formHtml=buildForm(e);
+  const whyHtml=e.why?`<div class="ex-why">${e.why}</div>`:'';
+  const logHtml=isCond?'':`<div class="log-sec"><div class="log-ttl">Log Sets</div><div class="set-rows">${sets}</div><textarea class="ni" id="notes-${e.id}" placeholder="Notes..." rows="1"></textarea></div>`;
+
+  return`<div class="ex${e.spine?' l2s1':''}${e.shldr?' shldr':''}" id="block-${e.id}">
+    <div class="ex-top" onclick="toggleEx('${e.id}')">
+      <div>
+        <div class="ex-name-row"><span class="ex-name">${e.name}</span>${badgeArr}</div>
+        <div class="ex-muscle">${e.muscle}</div>
+      </div>
+      <div class="ex-right">
+        <div class="ex-target${e.type==='compound'?' cmp':''}">${targetDisp}</div>
+        <div class="ex-rest-lbl">${e.rest?'REST '+e.rest+'s':''}</div>
+      </div>
+      <div class="ex-chev">▼</div>
+    </div>
+    <div class="ex-body">
+      ${whyHtml}
+      ${isCond?'':`<div class="ex-prog"><span class="pi ${pc}">${pt}</span></div>`}
+      ${formHtml}
+      ${isCond?'':`<div class="ex-footer"><button class="form-btn" onclick="event.stopPropagation();toggleForm('${e.id}')">▸ FORM CUES</button><span id="sess-count-${e.id}" style="font-family:var(--mono);font-size:8px;color:var(--muted)">${hist.length} session${hist.length!==1?'s':''}</span></div>`}
+      ${logHtml}
+    </div>
+  </div>`;
 }
 
-function saveSheetUrl() {
-  const val = document.getElementById('sheet-url-input').value.trim();
-  sheetUrl = val;
-  localStorage.setItem('sheetUrl', val);
-  const link = document.getElementById('sheets-link');
-  if (val) { link.href = val; link.style.display = 'inline-flex'; }
-  document.getElementById('sheet-config').classList.remove('visible');
-  showToast('Sheet URL saved ✓');
+function buildSetRow(exId,n,last,dayId,restSec,exName){
+  const lw=last?last.weight:'',lr=last?last.reps:'';
+  const opts=['—','6','7','7.5','8','8.5','9','9.5','10'].map(v=>`<option>${v}</option>`).join('');
+  return`<div class="set-row">
+    <span class="sn">${n}</span>
+    <input class="si" id="w-${exId}-${n}" type="number" placeholder="${lw||'lb'}" step="2.5" inputmode="decimal"/>
+    <input class="si" id="r-${exId}-${n}" type="number" placeholder="${lr||'reps'}" inputmode="numeric"/>
+    <select class="rs" id="rpe-${exId}-${n}">${opts}</select>
+    <button class="sv" id="sb-${exId}-${n}" onclick="saveSet('${exId}','${n}','${dayId}',${restSec},'${exName.replace(/'/g,'\\\'').substring(0,30)}')">SAVE</button>
+  </div>`;
 }
 
-// ═══════════════════════════════════════════════
-// START
-// ═══════════════════════════════════════════════
+function buildForm(e){
+  const fmt=arr=>arr.map(c=>{
+    if(c.startsWith('k:'))return`<li class="k">${c.slice(2)}</li>`;
+    if(c.startsWith('x:'))return`<li class="x">${c.slice(2)}</li>`;
+    if(c.startsWith('sh:'))return`<li class="sh">${c.slice(3)}</li>`;
+    return`<li>${c}</li>`;
+  }).join('');
+  const hasTempo=e.tempo&&e.tempo[0]!=='—';
+  const tempoHtml=hasTempo?`<div class="tempo-r"><span class="tempo-l">TEMPO</span>${e.tempo.map((t,i)=>`<div class="tb"><div class="tn">${t}</div><div class="tp">${e.tl[i]}</div></div>${i<e.tempo.length-1?'<span class="ts">·</span>':''}`).join('')}</div>`:'';
+  return`<div class="form-panel" id="form-${e.id}">
+    <div class="fg">
+      <div><div class="cue-hd s">Setup</div><ul class="cl">${fmt(e.setup)}</ul></div>
+      <div><div class="cue-hd e">Execution</div><ul class="cl">${fmt(e.exec)}</ul></div>
+      <div><div class="cue-hd b">Breathing</div><ul class="cl">${fmt(e.breath)}</ul></div>
+      <div><div class="cue-hd m">Mistakes</div><ul class="cl">${fmt(e.mistakes)}</ul></div>
+    </div>${tempoHtml}
+  </div>`;
+}
+
+// ═══════════════════════════════════════════
+// INTERACTIONS
+// ═══════════════════════════════════════════
+function toggleWU(){const wb=document.getElementById('wu-block');if(wb)wb.classList.toggle('open');}
+function toggleEx(id){document.getElementById('block-'+id).classList.toggle('ex-open');}
+function toggleForm(id){
+  const b=document.getElementById('block-'+id);
+  const was=b.classList.contains('form-open');
+  document.querySelectorAll('.ex.form-open').forEach(x=>x.classList.remove('form-open'));
+  if(!was)b.classList.add('form-open');
+}
+function setTime(m){timeBudget=m;document.querySelectorAll('.topt').forEach(el=>el.classList.toggle('active',parseInt(el.textContent)===m));}
+function handleDeload(){
+  isDeload=document.getElementById('dl-tog').checked;
+  document.getElementById('dl-row').classList.toggle('on',isDeload);
+  document.getElementById('st-dl').style.display=isDeload?'flex':'none';
+  renderWorkout();
+}
+
+// ═══════════════════════════════════════════
+// SAVE SET
+// ═══════════════════════════════════════════
+function saveSet(exId,n,dayId,restSec,exName){
+  const w=document.getElementById(`w-${exId}-${n}`)?.value;
+  const r=document.getElementById(`r-${exId}-${n}`)?.value;
+  const rpe=parseFloat(document.getElementById(`rpe-${exId}-${n}`)?.value)||0;
+  const notes=document.getElementById(`notes-${exId}`)?.value||'';
+  if(!w||!r){showToast('Enter weight and reps',true);return;}
+  const btn=document.getElementById(`sb-${exId}-${n}`);
+  if(btn){btn.textContent='✓';btn.classList.add('saved');btn.disabled=true;}
+  const k=`${dayId}-${exId}`;
+  if(!appData.sessions[k])appData.sessions[k]=[];
+  const today=new Date().toDateString();
+  const idx=appData.sessions[k].findIndex(s=>s.date===today);
+  const entry={weight:parseFloat(w),reps:parseInt(r),rpe,notes,date:today,set:parseInt(n)};
+  if(idx>=0)appData.sessions[k][idx]=entry;else appData.sessions[k].push(entry);
+  if(appData.sessions[k].length>12)appData.sessions[k].splice(0,appData.sessions[k].length-12);
+  appData.totalSets=(appData.totalSets||0)+1;
+  setsToday++;saveData();updateStatus();
+
+  // Fix 1: Update sessions counter span live
+  const sessCountEl=document.getElementById(`sess-count-${exId}`);
+  if(sessCountEl){
+    const c=appData.sessions[k].length;
+    sessCountEl.textContent=c+' session'+(c!==1?'s':'');
+    sessCountEl.style.color='var(--green)';
+  }
+
+  // Check if all sets for this exercise are completed — mark card done
+  const block=document.getElementById(`block-${exId}`);
+  if(block){
+    const allBtns=block.querySelectorAll('.sv');
+    const allSaved=[...allBtns].every(b=>b.classList.contains('saved'));
+    if(allSaved){
+      block.style.borderColor='rgba(0,232,150,0.4)';
+      block.style.borderLeftColor=block.classList.contains('l2s1')?'var(--warn)':block.classList.contains('shldr')?'var(--accent2)':'rgba(0,232,150,0.4)';
+      // Green checkmark in header
+      const nameRow=block.querySelector('.ex-name-row');
+      if(nameRow&&!nameRow.querySelector('.done-check')){
+        const chk=document.createElement('span');
+        chk.className='done-check';
+        chk.style.cssText='font-family:var(--mono);font-size:10px;color:var(--green);letter-spacing:1px;';
+        chk.textContent='✓ DONE';
+        nameRow.appendChild(chk);
+      }
+    }
+  }
+
+  // Update prog indicator
+  const hist=appData.sessions[k];
+  const pe=document.querySelector(`#block-${exId} .ex-prog`);
+  if(pe&&hist.length>=2){
+    const l=hist[hist.length-1],p=hist[hist.length-2];
+    let pc='hold',pt='▸ MATCH OR BEAT — '+l.weight+'lb × '+l.reps+' @ RPE'+l.rpe;
+    if(l.rpe<=7&&p.rpe<=7&&l.weight===p.weight){pc='up';pt='▲ ADD 5lb NEXT SESSION';}
+    if(l.rpe>=9&&p.rpe>=9){pc='down';pt='▽ REDUCE LOAD NEXT SESSION';}
+    pe.innerHTML=`<span class="pi ${pc}">${pt}</span>`;
+  }
+  startTimer(restSec,exName+' S'+n);
+  showToast('Set '+n+' saved · Timer started');
+}
+
+// ═══════════════════════════════════════════
+// DASHBOARD
+// ═══════════════════════════════════════════
+function saveBW(){
+  const v=parseFloat(document.getElementById('bw-inp').value);
+  if(!v||v<80||v>400){showToast('Invalid weight',true);return;}
+  const today=new Date().toDateString();
+  appData.bwLog=appData.bwLog||[];
+  const idx=appData.bwLog.findIndex(e=>e.date===today);
+  if(idx>=0)appData.bwLog[idx].w=v;else appData.bwLog.push({date:today,w:v});
+  if(appData.bwLog.length>56)appData.bwLog.splice(0,appData.bwLog.length-56);
+  saveData();buildDash();showToast(v+' lb logged ✓');
+}
+
+function buildDash(){
+  const log=appData.bwLog||[];
+  const sEl=document.getElementById('t-sets'),ssEl=document.getElementById('t-sess');
+  if(sEl)sEl.textContent=appData.totalSets||0;
+  const dates=new Set();
+  Object.values(appData.sessions||{}).forEach(arr=>arr.forEach(s=>dates.add(s.date)));
+  if(ssEl)ssEl.textContent=dates.size;
+  const bwEl=document.getElementById('bw-disp'),tEl=document.getElementById('bw-trend'),chEl=document.getElementById('bw-chart');
+  if(!log.length){if(bwEl)bwEl.textContent='—';if(tEl)tEl.textContent='Log bodyweight to track progress';if(chEl)chEl.innerHTML='<div style="font-family:var(--mono);font-size:8px;color:var(--muted);letter-spacing:1px;padding:16px 0;text-align:center;width:100%">LOG BODYWEIGHT TO SEE TREND</div>';return;}
+  const lat=log[log.length-1];
+  if(bwEl)bwEl.textContent=lat.w+'lb';
+  if(log.length>=2&&tEl){const d=(lat.w-log[log.length-2].w).toFixed(1);const col=d<0?'var(--green)':d>0?'var(--warn)':'var(--accent)';tEl.innerHTML=`<span style="color:${col}">${d<0?'▼':'▲'} ${Math.abs(d)} lb since last log</span>`;}
+  if(chEl){const rec=log.slice(-8);const vals=rec.map(e=>e.w);const mn=Math.min(...vals)-2,mx=Math.max(...vals)+2,rng=mx-mn;
+    chEl.innerHTML=rec.map((e,i)=>{const pct=rng>0?((e.w-mn)/rng)*100:50;const cur=i===rec.length-1;const lo=i>0&&e.w<rec[i-1].w;return`<div class="tb2${cur?' cur':''}${lo?' lo':''}" style="height:${Math.max(8,pct)}%" title="${e.w}lb"></div>`;}).join('');}
+  const pa=document.getElementById('prog-area');if(!pa)return;
+  const sess=appData.sessions;const keys=Object.keys(sess);if(!keys.length)return;
+  let html='';
+  keys.forEach(k=>{const hist=sess[k];if(hist.length<2)return;
+    const name=k.split('-').slice(2).join(' ');const first=hist[0],lst=hist[hist.length-1];
+    const diff=lst.weight-first.weight;const col=diff>0?'var(--green)':diff<0?'var(--warn)':'var(--accent)';
+    html+=`<div style="display:flex;align-items:center;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--border)"><div><div style="font-size:12px;font-weight:500">${name}</div><div style="font-family:var(--mono);font-size:8px;color:var(--muted);margin-top:1px;letter-spacing:1px">${hist.length} SESSIONS · STARTED ${first.weight}lb</div></div><div style="text-align:right"><div style="font-family:var(--cond);font-size:17px;font-weight:700;color:${col}">${diff>0?'+':''}${diff}lb</div><div style="font-family:var(--mono);font-size:8px;color:var(--muted)">${lst.weight}lb NOW</div></div></div>`;
+  });
+  pa.innerHTML=html||'<div style="font-family:var(--mono);font-size:9px;color:var(--muted);padding:12px 0;text-align:center;letter-spacing:1px">LOG 2+ SESSIONS PER EXERCISE TO SEE PROGRESS</div>';
+}
+
+function updateStatus(){document.getElementById('st-sets').textContent=appData.totalSets||0;}
+function showToast(msg,err){const t=document.getElementById('toast');t.textContent=msg;t.className='toast'+(err?' err':'')+' show';setTimeout(()=>t.classList.remove('show'),2500);}
+
 init();
 </script>
 </body>
